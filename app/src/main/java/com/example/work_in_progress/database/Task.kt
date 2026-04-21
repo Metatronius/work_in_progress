@@ -5,5 +5,8 @@ import androidx.room.*
 data class Task(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title: String,
-    val isCompleted: Boolean = false
+    val priority: Int,
+    val date: String,
+    val progress: Int = 0,
+    val target: Int = 1
 )

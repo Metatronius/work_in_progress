@@ -25,7 +25,7 @@
                 android:paddingTop="40dp"/>
         </LinearLayout>
 
-        <!-- title:  -->
+        <!-- title  -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

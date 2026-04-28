@@ -31,7 +31,7 @@
         android:layout_marginTop="8dp"
         android:text="Priority: "/>
 
-    <!-- notes -->
+    <!-- notes section -->
     <TextView
         android:id="@+id/detailNotes"
         android:layout_width="wrap_content"

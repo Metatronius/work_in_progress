@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                 titleView.textSize = 18f
                 titleView.setPadding(8, 0, 0, 0)
 
-                    //click
+                    //click details
                 titleView.setOnClickListener {
                     val intent = Intent(this, TaskDetail::class.java)
                     intent.putExtra("TITLE", task["TITLE"])

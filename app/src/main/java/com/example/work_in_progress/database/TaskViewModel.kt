@@ -1,32 +1,34 @@
 package com.example.work_in_progress.database
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
-class TaskViewModel(private val taskDao: TaskDao) : ViewModel() {
-    val allTasks: Flow<List<Task>> = taskDao.getAllTasks()
+class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
+    val allTasks: LiveData<List<Task>> = taskRepository.allTasks.asLiveData()
 
-    fun addTask(newTask: Task) {
+    fun addTask(newTask: TaskParams) {
         viewModelScope.launch {
-            taskDao.insertTask(newTask)
+            taskRepository.insert(Task(title = newTask.title))
         }
     }
 
     fun completeTask(task: Task) {
         viewModelScope.launch {
-            taskDao.updateTask(task.copy(progress = (task.progress + 1) % 2))
+            taskRepository.update(task.copy(progress = (task.progress + 1) % 2))
         }
     }
 }
 
-class TaskViewModelFactory(private val taskDao: TaskDao) : ViewModelProvider.Factory {
+class TaskViewModelFactory(private val repository: TaskRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TaskViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return TaskViewModel(taskDao) as T
+            return TaskViewModel(repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

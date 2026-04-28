@@ -7,10 +7,13 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.example.work_in_progress.database.Task
+import com.example.work_in_progress.extensions.getTaskViewModel
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var taskContainer: LinearLayout
+    private val viewModel by lazy { getTaskViewModel() }
     private lateinit var searchBar: EditText
 
     private val taskList = mutableListOf<Map<String, String>>()
@@ -18,6 +21,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        viewModel.allTasks.observe(this) {tasks ->
+            renderTasks(tasks)
+        }
 
         val addTaskButton = findViewById<Button>(R.id.addTaskButton)
         taskContainer = findViewById(R.id.taskContainer)
@@ -90,6 +97,13 @@ class MainActivity : AppCompatActivity() {
 
                 taskContainer.addView(rowLayout)
             }
+        }
+    }
+
+    private fun renderTasks(tasks: List<Task>) {
+        // Just print the tasks for now
+        tasks.forEach { task ->
+            print(task.title)
         }
     }
 }

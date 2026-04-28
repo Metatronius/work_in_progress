@@ -11,7 +11,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Work_in_progress">
-
+        <activity
+            android:name=".TaskDetail"
+            android:exported="false" />
         <activity
             android:name=".AddTask"
             android:exported="false" />

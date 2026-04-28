@@ -19,6 +19,7 @@ class AddTask : AppCompatActivity() {
         val reminderSwitch = findViewById<Switch>(R.id.reminderSwitch)
         val priorityGroup = findViewById<RadioGroup>(R.id.priorityGroup)
 
+
         saveButton.setOnClickListener {
 
             val title = taskTitle.text.toString()

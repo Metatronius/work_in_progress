@@ -1,57 +1,72 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+<TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:text="work_in_progress"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:paddingTop="40dp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="work_in_progress"
-            android:textSize="24sp"
-            android:textStyle="bold"/>
+    <!-- search -->
+    <EditText
+        android:id="@+id/searchBar"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="Search tasks"
+        android:layout_marginTop="12dp"/>
 
-        <!-- search bar -->
-        <EditText
-            android:id="@+id/searchBar"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:hint="Search tasks"
-            android:layout_marginTop="12dp"/>
+    <!-- due soon -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Due Soon"
+        android:layout_marginTop="16dp"/>
 
-        <!-- due soon -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Due Soon"
-            android:layout_marginTop="16dp"/>
+    <TextView
+        android:id="@+id/dueSoonPlaceholder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No tasks yet"/>
 
-        <!-- placeholder -->
-        <TextView
-            android:id="@+id/dueSoonPlaceholder"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="No tasks yet"/>
 
-        <!-- task list -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="All Tasks"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"/>
+
+    <!-- task list -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"
+        android:contentDescription="List of tasks">
+
         <LinearLayout
             android:id="@+id/taskContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="16dp"/>
+            android:orientation="vertical"/>
+    </ScrollView>
 
-        <!-- add task button -->
-        <Button
-            android:id="@+id/addTaskButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="+ Add Task"
-            android:layout_marginTop="16dp"/>
 
-    </LinearLayout>
-</ScrollView>
+    <!-- add task button -->
+    <Button
+        android:id="@+id/addTaskButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Task"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="#2196F3"
+        android:textColor="#FFFFFF"/>
+
+
+</LinearLayout>

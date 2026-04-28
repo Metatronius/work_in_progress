@@ -7,14 +7,21 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.work_in_progress.database.Task
+import com.example.work_in_progress.extensions.getTaskViewModel
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var taskContainer: LinearLayout
+    private val viewModel by lazy { getTaskViewModel() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        viewModel.allTasks.observe(this) {tasks ->
+            renderTasks(tasks)
+        }
 
         val addTaskButton = findViewById<Button>(R.id.addTaskButton)
         taskContainer = findViewById(R.id.taskContainer)
@@ -39,6 +46,13 @@ class MainActivity : AppCompatActivity() {
 
                 taskContainer.addView(newTask)
             }
+        }
+    }
+
+    private fun renderTasks(tasks: List<Task>) {
+        // Just print the tasks for now
+        tasks.forEach { task ->
+            print(task.title)
         }
     }
 }

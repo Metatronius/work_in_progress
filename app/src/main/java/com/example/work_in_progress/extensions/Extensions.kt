@@ -1,4 +1,10 @@
 package com.example.work_in_progress.extensions
 
-class Extensions {
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import com.example.work_in_progress.database.*
+import com.example.work_in_progress.taskRepo
+
+fun AppCompatActivity.getTaskViewModel(): TaskViewModel {
+    return ViewModelProvider(this, TaskViewModelFactory(this.taskRepo))[TaskViewModel::class.java]
 }

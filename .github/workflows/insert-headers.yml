@@ -17,10 +17,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Insert header comment into Kotlin files that are missing one
+      - name: Insert file-level copyright header into Kotlin files that are missing one
         run: |
           HEADER="// Copyright (c) $(date +%Y) Metatronius. All rights reserved."
-          changed=false
 
           while IFS= read -r -d '' file; do
             first_line=$(head -n 1 "$file")
@@ -28,19 +27,25 @@ jobs:
             if [[ "$first_line" =~ ^[[:space:]]*(//|/\*) ]]; then
               continue
             fi
-            echo "Adding header to: $file"
+            echo "Adding file header to: $file"
             tmp=$(mktemp)
             { echo "$HEADER"; echo; cat "$file"; } > "$tmp"
             mv "$tmp" "$file"
-            changed=true
           done < <(find . -name "*.kt" -not -path "./.git/*" -print0)
 
-          if [ "$changed" = true ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Insert KDoc stubs for undocumented functions and classes
+        run: |
+          find . -name "*.kt" -not -path "./.git/*" -print0 \
+            | xargs -0 python3 .github/scripts/insert_kdoc.py
+
+      - name: Commit changes if any
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
             git add -A
             git commit -m "chore: add missing header comments to Kotlin files"
             git push
           else
-            echo "All Kotlin files already have header comments."
+            echo "No changes to commit."
           fi

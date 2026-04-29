@@ -6,6 +6,8 @@ on:
 
 jobs:
   insert-headers:
+    # Skip runs triggered by this workflow's own commits to avoid an infinite loop.
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -23,7 +25,7 @@ jobs:
           while IFS= read -r -d '' file; do
             first_line=$(head -n 1 "$file")
             # Skip files whose first line is already a comment (// or /*)
-            if [[ "$first_line" =~ ^[[:space:]]*/[/*] ]]; then
+            if [[ "$first_line" =~ ^[[:space:]]*(//|/\*) ]]; then
               continue
             fi
             echo "Adding header to: $file"

@@ -90,11 +90,15 @@ def process_file(path: str) -> bool:
 
 
 def main() -> None:
+    errors = False
     for path in sys.argv[1:]:
         try:
             process_file(path)
         except Exception as exc:
             print(f'ERROR processing {path}: {exc}', file=sys.stderr)
+            errors = True
+    if errors:
+        sys.exit(1)
 
 
 if __name__ == '__main__':

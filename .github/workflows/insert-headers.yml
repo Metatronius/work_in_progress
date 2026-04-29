@@ -1,0 +1,44 @@
+name: Insert Header Comments
+
+on:
+  push:
+    branches: ["**"]
+
+jobs:
+  insert-headers:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Insert header comment into Kotlin files that are missing one
+        run: |
+          HEADER="// Copyright (c) $(date +%Y) Metatronius. All rights reserved."
+          changed=false
+
+          while IFS= read -r -d '' file; do
+            first_line=$(head -n 1 "$file")
+            # Skip files whose first line is already a comment (// or /*)
+            if [[ "$first_line" =~ ^[[:space:]]*/[/*] ]]; then
+              continue
+            fi
+            echo "Adding header to: $file"
+            tmp=$(mktemp)
+            { echo "$HEADER"; echo; cat "$file"; } > "$tmp"
+            mv "$tmp" "$file"
+            changed=true
+          done < <(find . -name "*.kt" -not -path "./.git/*" -print0)
+
+          if [ "$changed" = true ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "chore: add missing header comments to Kotlin files"
+            git push
+          else
+            echo "All Kotlin files already have header comments."
+          fi

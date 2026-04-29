@@ -7,6 +7,12 @@ import androidx.appcompat.app.AppCompatActivity
 
 class TaskDetail : AppCompatActivity() {
 
+    /**
+     * Initializes the task detail screen and populates each [android.widget.TextView]
+     * with data received from the launching [android.content.Intent].
+     *
+     * @param savedInstanceState Previously saved instance state, or null.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_detail)
@@ -30,6 +36,13 @@ class TaskDetail : AppCompatActivity() {
         notesView.text = "Notes: $notes"
     }
 
+    /**
+     * Handles action bar item selections. Pressing the Up/Home button finishes
+     * the activity and returns to the previous screen.
+     *
+     * @param item The menu item that was selected.
+     * @return `true` if the event was handled; delegates to super otherwise.
+     */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return if (item.itemId == android.R.id.home) {
             finish()

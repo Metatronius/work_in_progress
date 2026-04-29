@@ -8,6 +8,13 @@ import androidx.appcompat.app.AppCompatActivity
 
 class AddTask : AppCompatActivity() {
 
+    /**
+     * Initializes the Add Task screen, wires up UI components, and returns the
+     * collected task data to the caller via an [android.content.Intent] result
+     * when the user taps Save.
+     *
+     * @param savedInstanceState Previously saved instance state, or null.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.add_task)

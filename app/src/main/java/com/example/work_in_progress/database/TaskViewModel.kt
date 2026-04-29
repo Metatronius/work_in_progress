@@ -19,18 +19,23 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
      *
      * @param newTask Parameters describing the task to create.
      */
-    fun addTask(newTask: TaskParams) = viewModelScope.launch {
-        taskRepository.insert(
-            Task(
-                title = newTask.title,
-                notes = newTask.notes,
-                priority = newTask.priority,
-                due = newTask.due,
-                remind = newTask.remind,
-                progress = newTask.progress,
-                target = newTask.target
+    fun addTask(newTask: TaskParams) {
+        require(newTask.title.isNotBlank() && newTask.title.length in 0..30) { "Title must not be blank or exceed 30 characters." }
+        require(newTask.priority in 0..3) { "Priority must be between 0 and 3." }
+
+        viewModelScope.launch {
+            taskRepository.insert(
+                Task(
+                    title = newTask.title,
+                    notes = newTask.notes,
+                    priority = newTask.priority,
+                    due = newTask.due,
+                    remind = newTask.remind,
+                    progress = newTask.progress,
+                    target = 1
+                )
             )
-        )
+        }
     }
 
     /**

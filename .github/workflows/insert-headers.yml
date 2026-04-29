@@ -38,6 +38,14 @@ jobs:
           find . -name "*.kt" -not -path "./.git/*" -print0 \
             | xargs -0 python3 .github/scripts/insert_kdoc.py
 
+      - name: Generate KDoc comments via OpenAI
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          pip install --quiet openai
+          find . -name "*.kt" -not -path "./.git/*" -print0 \
+            | xargs -0 python3 .github/scripts/generate_kdoc.py
+
       - name: Commit changes if any
         run: |
           git config user.name "github-actions[bot]"

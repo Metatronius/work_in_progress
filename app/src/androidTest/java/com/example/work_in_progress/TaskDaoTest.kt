@@ -43,12 +43,22 @@ class TaskDaoTest {
 
     @Test
     fun deleteTask() = runBlocking {
-        val task = Task(title = "Delete Me")
+        val task = Task(id = 2, title = "Delete Me")
         taskDao.insertTask(task)
         taskDao.deleteTask(task)
 
         val allTasks = taskDao.getAllTasks().first()
 
         assert(allTasks.isEmpty())
+    }
+
+    @Test
+    fun getTaskById() = runBlocking {
+        val task = Task(id = 2, title = "Get Me")
+        taskDao.insertTask(task)
+        val insertedTask = taskDao.getTaskById(task.id)
+
+        assert(insertedTask !== null)
+        assert(insertedTask?.title == task.title)
     }
 }

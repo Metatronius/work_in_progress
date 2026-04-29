@@ -26,7 +26,14 @@ except ImportError:
 STUB = "/** TODO: add documentation. */"
 
 # Number of lines of body to include after the declaration for context.
+# 15 lines is enough to cover parameters, return type, and the opening body
+# of most short functions while keeping the token count (and API cost) low.
 CONTEXT_BODY_LINES = 15
+
+# Maximum tokens allowed for the generated KDoc response.
+# 300 tokens is sufficient for a well-structured KDoc with a few @param /
+# @return tags, while preventing runaway responses that inflate API costs.
+MAX_KDOC_TOKENS = 300
 
 SYSTEM_PROMPT = (
     "You are a Kotlin documentation expert. "
@@ -62,7 +69,7 @@ def _ask_openai(client: "OpenAI", context: str) -> str:
             {"role": "user", "content": user_message},
         ],
         temperature=0.2,
-        max_tokens=300,
+        max_tokens=MAX_KDOC_TOKENS,
     )
     return response.choices[0].message.content.strip()
 

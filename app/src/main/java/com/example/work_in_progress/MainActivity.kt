@@ -25,12 +25,6 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_ADD_TASK = 1
     }
 
-    /**
-     * Initializes the activity, inflates the layout, wires up button listeners,
-     * and begins observing the task LiveData from [viewModel].
-     *
-     * @param savedInstanceState Previously saved instance state, or null.
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -56,17 +50,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    /**
-     * Receives the result from [AddTask] and persists the new task to the database
-     * via the [viewModel].
-     *
-     * Note: [startActivityForResult] is deprecated in favour of
-     * [androidx.activity.result.ActivityResultLauncher]; migrate when convenient.
-     *
-     * @param requestCode The integer request code originally supplied to [startActivityForResult].
-     * @param resultCode  The result code returned by the child activity.
-     * @param data        An [Intent] carrying result data, or null.
-     */
     @Deprecated("Use ActivityResultLauncher instead.")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         @Suppress("DEPRECATION")
@@ -90,13 +73,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Rebuilds [taskContainer] showing only tasks whose titles contain [query]
-     * (case-insensitive). Each row includes a completion checkbox and a clickable
-     * title that opens [TaskDetail].
-     *
-     * @param query The search string used to filter task titles.
-     */
     private fun displayTasks(query: String) {
         taskContainer.removeAllViews()
 
@@ -129,6 +105,15 @@ class MainActivity : AppCompatActivity() {
                     }
                     startActivity(intent)
                 }
+                setOnLongClickListener {
+                    android.app.AlertDialog.Builder(this@MainActivity)
+                        .setTitle("Delete Task")
+                        .setMessage("Are you sure you want to delete \"${task.title}\"?")
+                        .setPositiveButton("Delete") { _, _ -> viewModel.deleteTask(task) }
+                        .setNegativeButton("Cancel", null)
+                        .show()
+                    true
+                }
             }
 
             rowLayout.addView(checkBox)
@@ -137,12 +122,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Updates the cached task list and refreshes the displayed task views.
-     * Called every time Room emits a new list via the [viewModel] observer.
-     *
-     * @param tasks The latest list of [Task] objects from the database.
-     */
     private fun renderTasks(tasks: List<Task>) {
         currentTasks = tasks
         displayTasks(searchBar.text.toString())

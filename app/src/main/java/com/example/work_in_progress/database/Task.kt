@@ -1,3 +1,4 @@
+/** Room entity definition for a task stored in the "tasks" table. */
 package com.example.work_in_progress.database
 import androidx.room.*
 import java.util.Date

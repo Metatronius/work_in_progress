@@ -1,3 +1,4 @@
+/** Room database configuration and singleton provider for the application. */
 package com.example.work_in_progress.database
 import android.content.Context
 import androidx.room.*

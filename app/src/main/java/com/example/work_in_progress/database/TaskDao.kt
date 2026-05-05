@@ -1,3 +1,4 @@
+/** Room DAO interface declaring all SQL operations for the [Task] entity. */
 package com.example.work_in_progress.database
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
@@ -12,6 +13,11 @@ interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY id DESC")
     fun getAllTasks(): Flow<List<Task>>
 
+    /**
+     * Returns the [Task] with the given [id], or null if no such task exists.
+     *
+     * @param id The primary key of the task to look up.
+     */
     @Query(value = "SELECT * FROM tasks WHERE id = :id")
     fun getTaskById(id: Int): Task?
 

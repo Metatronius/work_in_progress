@@ -12,6 +12,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY id DESC")
     fun getAllTasks(): Flow<List<Task>>
 
+    @Query(value = "SELECT * FROM tasks WHERE id = :id")
+    fun getTaskById(id: Int): Task?
+
     /**
      * Inserts [task] into the database. If a row with the same primary key already
      * exists it is replaced.

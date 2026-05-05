@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Metatronius. All rights reserved.
+
 package com.example.work_in_progress
 
 import android.app.Activity
@@ -7,8 +9,26 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.work_in_progress.extensions.getTaskViewModel
 
+/**
+ * Activity for editing an existing task.
+ *
+ * This activity retrieves task details from the intent and initializes the user interface
+ * for editing the task's title, date, priority, notes, and reminder settings.
+ *
+ * @param savedInstanceState A Bundle containing the activity's previously saved state.
+ *                           If the activity has never existed before, this value is null.
+ */
 class EditTask : AppCompatActivity() {
 
+    /**
+     * Called when the activity is starting. This is where you initialize your activity.
+     * It sets the content view to the layout for editing a task and retrieves task details
+     * from the intent extras.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously
+     * being shut down then this Bundle contains the data it most recently supplied in
+     * onSaveInstanceState(Bundle). Otherwise, it is null.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_task)

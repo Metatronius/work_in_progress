@@ -1,3 +1,4 @@
+/** Repository layer that abstracts [TaskDao] access from the rest of the application. */
 package com.example.work_in_progress.database
 
 import kotlinx.coroutines.flow.Flow
@@ -34,5 +35,10 @@ class TaskRepository(private val taskDao: TaskDao) {
      */
     suspend fun delete(task: Task) = taskDao.deleteTask(task)
 
+    /**
+     * Returns the [Task] with the given [id], or null if not found.
+     *
+     * @param id The primary key of the task to look up.
+     */
     suspend fun getTaskById(id: Int) = taskDao.getTaskById(id)
 }

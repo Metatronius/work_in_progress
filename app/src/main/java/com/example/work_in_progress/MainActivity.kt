@@ -1,3 +1,4 @@
+/** Main entry-point Activity that lists tasks, supports search filtering, and launches [AddTask]. */
 package com.example.work_in_progress
 
 import android.app.Activity
@@ -11,6 +12,10 @@ import com.example.work_in_progress.database.Task
 import com.example.work_in_progress.database.TaskParams
 import com.example.work_in_progress.extensions.getTaskViewModel
 
+/**
+ * Main screen that displays all tasks in a scrollable list, provides a search bar for
+ * filtering by title, and navigates to [AddTask] to create new tasks.
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var taskContainer: LinearLayout
@@ -25,6 +30,12 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_ADD_TASK = 1
     }
 
+    /**
+     * Inflates the layout, binds UI views, observes the task list [LiveData], and wires up
+     * the add-task button and search bar listeners.
+     *
+     * @param savedInstanceState Previously saved instance state, or null.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -50,6 +61,13 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    /**
+     * Receives the result from [AddTask] and persists the new task via the ViewModel.
+     *
+     * @param requestCode The request code passed to startActivityForResult.
+     * @param resultCode  The result code returned by the child activity.
+     * @param data        The Intent carrying the task field extras, or null.
+     */
     @Deprecated("Use ActivityResultLauncher instead.")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         @Suppress("DEPRECATION")
@@ -73,6 +91,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Clears [taskContainer] and re-renders only those tasks whose title contains [query]
+     * (case-insensitive). Each row includes a completion checkbox and a tappable title.
+     *
+     * @param query The search string to filter tasks by title.
+     */
     private fun displayTasks(query: String) {
         taskContainer.removeAllViews()
 
@@ -122,6 +146,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Updates [currentTasks] with the latest emission from the database and refreshes the
+     * displayed list using the current search query.
+     *
+     * @param tasks The full, up-to-date list of tasks from the database.
+     */
     private fun renderTasks(tasks: List<Task>) {
         currentTasks = tasks
         displayTasks(searchBar.text.toString())

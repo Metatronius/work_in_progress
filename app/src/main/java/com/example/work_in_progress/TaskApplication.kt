@@ -1,3 +1,4 @@
+/** Application entry-point that initialises the Room database and repository singletons. */
 package com.example.work_in_progress
 
 import android.app.Application

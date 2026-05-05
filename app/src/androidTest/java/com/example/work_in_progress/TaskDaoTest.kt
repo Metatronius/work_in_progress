@@ -1,3 +1,4 @@
+/** Instrumented integration tests for [TaskDao] using an in-memory Room database. */
 package com.example.work_in_progress
 
 import android.content.Context
@@ -14,11 +15,16 @@ import org.junit.runner.RunWith
 import java.io.IOException
 import kotlin.jvm.Throws
 
+/**
+ * Instrumented tests for [com.example.work_in_progress.database.TaskDao] using an in-memory
+ * Room database so tests are isolated and leave no on-disk state.
+ */
 @RunWith(AndroidJUnit4::class)
 class TaskDaoTest {
     private lateinit var taskDao: TaskDao
     private lateinit var db: AppDatabase
 
+    /** Opens an in-memory database and retrieves the DAO before each test. */
     @Before
     fun createDB() {
         val context = ApplicationProvider.getApplicationContext<Context>()
@@ -26,12 +32,14 @@ class TaskDaoTest {
         taskDao = db.taskDao()
     }
 
+    /** Closes the in-memory database after each test to release resources. */
     @After
     @Throws(IOException::class)
     fun closeDb() {
         db.close()
     }
 
+    /** Inserts a task and verifies it appears in the full task list. */
     @Test
     fun writeTaskAndReadInList() = runBlocking {
         val task = Task(title = "Test Task")
@@ -41,6 +49,7 @@ class TaskDaoTest {
         assert(allTasks[0].title == task.title)
     }
 
+    /** Inserts a task, deletes it, then verifies the task list is empty. */
     @Test
     fun deleteTask() = runBlocking {
         val task = Task(id = 2, title = "Delete Me")
@@ -52,6 +61,7 @@ class TaskDaoTest {
         assert(allTasks.isEmpty())
     }
 
+    /** Inserts a task and verifies it can be retrieved by its primary key. */
     @Test
     fun getTaskById() = runBlocking {
         val task = Task(id = 2, title = "Get Me")

@@ -1,3 +1,4 @@
+/** Immutable value object carrying the user-supplied fields needed to create a new [Task]. */
 package com.example.work_in_progress.database
 
 /**

@@ -1,0 +1,60 @@
+name: Insert Header Comments
+
+on:
+  push:
+    branches: ["**"]
+
+jobs:
+  insert-headers:
+    # Skip runs triggered by this workflow's own commits to avoid an infinite loop.
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      models: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Insert file-level copyright header into Kotlin files that are missing one
+        run: |
+          HEADER="// Copyright (c) $(date +%Y) Metatronius. All rights reserved."
+
+          while IFS= read -r -d '' file; do
+            first_line=$(head -n 1 "$file")
+            # Skip files whose first line is already a comment (// or /*)
+            if [[ "$first_line" =~ ^[[:space:]]*(//|/\*) ]]; then
+              continue
+            fi
+            echo "Adding file header to: $file"
+            tmp=$(mktemp)
+            { echo "$HEADER"; echo; cat "$file"; } > "$tmp"
+            mv "$tmp" "$file"
+          done < <(find . -name "*.kt" -not -path "./.git/*" -print0)
+
+      - name: Insert KDoc stubs for undocumented functions and classes
+        run: |
+          find . -name "*.kt" -not -path "./.git/*" -print0 \
+            | xargs -0 python3 .github/scripts/insert_kdoc.py
+
+      - name: Generate KDoc comments via GitHub Models (Copilot)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          pip install --quiet openai
+          find . -name "*.kt" -not -path "./.git/*" -print0 \
+            | xargs -0 python3 .github/scripts/generate_kdoc.py
+
+      - name: Commit changes if any
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
+            git add -A
+            git commit -m "chore: add missing documentation to Kotlin files"
+            git push
+          else
+            echo "No changes to commit."
+          fi

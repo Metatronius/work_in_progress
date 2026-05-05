@@ -20,19 +20,43 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
      * @param newTask Parameters describing the task to create.
      */
     fun addTask(newTask: TaskParams) {
+        require(newTask.title.isNotBlank() && newTask.title.length in 0..30) { "Title must not be blank or exceed 30 characters." }
+        require(newTask.priority in 0..3) { "Priority must be between 0 and 3." }
+
         viewModelScope.launch {
             taskRepository.insert(
                 Task(
-                    title    = newTask.title,
-                    notes    = newTask.notes,
+                    title = newTask.title,
+                    notes = newTask.notes,
                     priority = newTask.priority,
-                    due      = newTask.due,
-                    remind   = newTask.remind,
+                    due = newTask.due,
+                    remind = newTask.remind,
                     progress = newTask.progress,
-                    target   = newTask.target
+                    target = 1
                 )
             )
         }
+    }
+
+    /**
+     * Delete a task by its [id] from the database.
+     *
+     * @param id The primary key of the task to delete.
+     */
+    fun deleteTaskById(id: Int) = viewModelScope.launch {
+        val targetTask = taskRepository.getTaskById(id)
+        targetTask?.let {
+            taskRepository.delete(targetTask)
+        }
+    }
+
+    /**
+     * Deletes [task] from the database.
+     *
+     * @param task The task to remove.
+     */
+    fun deleteTask(task: Task) = viewModelScope.launch {
+        taskRepository.delete(task)
     }
 
     /**
@@ -41,12 +65,10 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
      *
      * @param task The task whose progress should be toggled.
      */
-    fun completeTask(task: Task) {
-        viewModelScope.launch {
+    fun completeTask(task: Task) = viewModelScope.launch {
             taskRepository.update(task.copy(progress = (task.progress + 1) % 2))
         }
     }
-}
 
 /**
  * [ViewModelProvider.Factory] for creating [TaskViewModel] instances with the

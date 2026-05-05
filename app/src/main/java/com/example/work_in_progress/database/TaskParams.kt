@@ -10,7 +10,6 @@ package com.example.work_in_progress.database
  * @property due      Optional due-date string; null if no due date is set.
  * @property remind   Whether the user wants a reminder for this task.
  * @property progress Initial progress value (default 0 = not started).
- * @property target   Target progress value representing completion (default 1).
  */
 data class TaskParams(
     val title: String,
@@ -18,6 +17,11 @@ data class TaskParams(
     val priority: Int = 0,
     val due: String? = null,
     val remind: Boolean = false,
-    val progress: Int = 0,
-    val target: Int = 1
+    val progress: Int = 0
 )
+//{
+//    init {
+//        require(title.isNotBlank() && title.length < 30) { "Title cannot be blank or exceed 30 characters." }
+//        require(priority in 0..3) { "Priority must be between 0 and 3." }
+//    }
+//}

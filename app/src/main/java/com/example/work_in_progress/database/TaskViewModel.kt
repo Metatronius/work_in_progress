@@ -3,22 +3,10 @@ package com.example.work_in_progress.database
 import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 
-/**
- * ViewModel exposing task data and operations to the UI layer.
- * Survives configuration changes and keeps the UI free of direct database access.
- *
- * @param taskRepository The repository used for all task data operations.
- */
 class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
-    /** LiveData list of all tasks; automatically updated whenever the database changes. */
+
     val allTasks: LiveData<List<Task>> = taskRepository.allTasks.asLiveData()
 
-    /**
-     * Persists a new task built from [newTask] parameters to the database.
-     * All fields from [TaskParams] are mapped to the corresponding [Task] fields.
-     *
-     * @param newTask Parameters describing the task to create.
-     */
     fun addTask(newTask: TaskParams) {
         require(newTask.title.isNotBlank() && newTask.title.length in 0..30) { "Title must not be blank or exceed 30 characters." }
         require(newTask.priority in 0..3) { "Priority must be between 0 and 3." }
@@ -66,25 +54,11 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
      * @param task The task whose progress should be toggled.
      */
     fun completeTask(task: Task) = viewModelScope.launch {
-            taskRepository.update(task.copy(progress = (task.progress + 1) % 2))
-        }
+        taskRepository.update(task.copy(progress = (task.progress + 1) % 2))
     }
+}
 
-/**
- * [ViewModelProvider.Factory] for creating [TaskViewModel] instances with the
- * required [TaskRepository] dependency injected.
- *
- * @param repository The repository to inject into the created [TaskViewModel].
- */
 class TaskViewModelFactory(private val repository: TaskRepository) : ViewModelProvider.Factory {
-    /**
-     * Creates a new instance of the requested ViewModel class.
-     *
-     * @param T          The type of ViewModel to create.
-     * @param modelClass The [Class] of the ViewModel to instantiate.
-     * @return A new [TaskViewModel] cast to [T].
-     * @throws IllegalArgumentException if [modelClass] is not [TaskViewModel].
-     */
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TaskViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

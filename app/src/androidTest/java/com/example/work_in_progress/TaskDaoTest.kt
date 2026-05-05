@@ -74,6 +74,12 @@ class TaskDaoTest {
         assert(insertedTask?.title == task.title)
     }
 
+    /**
+     * Tests that changes to a task are persisted correctly in the database.
+     *
+     * This test inserts a task, updates its title and notes, and verifies that
+     * the changes are reflected when fetching the task by its ID.
+     */
     @Test
     fun updateTask_persistsChanges() = runBlocking {
         val task = Task(id = 3, title = "Original", notes = "Old notes")
@@ -87,6 +93,12 @@ class TaskDaoTest {
         assertEquals("New notes", fetched?.notes)
     }
 
+    /**
+     * Tests that the `getAllTasks` function returns tasks in descending order by their IDs.
+     *
+     * This test inserts three tasks with IDs 1, 2, and 3 into the database and verifies that
+     * the retrieved list of tasks is ordered from the highest ID to the lowest.
+     */
     @Test
     fun getAllTasks_returnsInDescendingIdOrder() = runBlocking {
         taskDao.insertTask(Task(id = 1, title = "First"))
@@ -100,12 +112,25 @@ class TaskDaoTest {
         assertEquals(1, allTasks[2].id)
     }
 
+    /**
+     * Tests that inserting a task with an existing ID replaces the original task in the database.
+     *
+     * This test verifies that when a task is inserted with an ID that already exists,
+     * the original task is replaced by the new task.
+     */
     @Test
     fun getTaskById_returnsNullForMissingId() = runBlocking {
         val result = taskDao.getTaskById(999)
         assertNull(result)
     }
 
+    /**
+     * Tests that inserting a task with the same ID as an existing task replaces the original task.
+     *
+     * This test verifies that when a task is inserted with an ID that already exists in the database,
+     * the original task is replaced by the new task. It checks that the size of the task list remains
+     * one and that the title of the task is updated to the new value.
+     */
     @Test
     fun insertTask_replacesOnConflict() = runBlocking {
         val task = Task(id = 10, title = "Original")

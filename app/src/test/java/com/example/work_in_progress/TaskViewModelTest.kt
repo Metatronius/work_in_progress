@@ -99,33 +99,6 @@ class TaskViewModelTest {
         verify(repository).update(task.copy(progress = 1))
     }
 
-    /**
-     * Tests the behavior of the `completeTask` function to ensure that it correctly toggles
-     * the progress of a task from 1 to 0.
-     *
-     * This test verifies that when a task with a progress of 1 is completed, the repository
-     * is updated to reflect the task's progress being set to 0.
-     */
-     * @Test
-     * fun completeTask_togglesProgressFrom1To0() = runTest {
-     * val task = Task(id = 1, title = "Task", progress = 1)
-     * viewModel.completeTask(task)
-     * verify(repository).update(task.copy(progress = 0))
-     * }
-     * 
-    /**
-     * Tests the `addTask` function to ensure that adding a task with a title that is exactly
-     * 30 characters long succeeds.
-     *
-     * This test verifies that when a task with a title of 30 characters is added, the repository
-     * is called to insert the task with the correct title.
-     */
-     * @Test
-     * fun addTask_titleExactly30Chars_succeeds() = runTest {
-     * val title = "a".repeat(30)
-     * viewModel.addTask(TaskParams(title = title))
-     * verify(repository).insert(argThat { this.title == title })
-     * }
     @Test
     fun completeTask_togglesProgressFrom1To0() = runTest {
         val task = Task(id = 1, title = "Task", progress = 1)
@@ -169,30 +142,6 @@ class TaskViewModelTest {
         verify(repository, never()).insert(any())
     }
 
-    /**
-     * Tests the behavior of adding tasks with all valid priority levels.
-     * It verifies that the `addTask` function successfully inserts tasks
-     * with priorities ranging from 0 to 3 into the repository.
-     */
-     * @Test
-     * fun addTask_allValidPriorities_succeed() = runTest {
-     * for (priority in 0..3) {
-     * viewModel.addTask(TaskParams(title = "Task", priority = priority))
-     * }
-     * verify(repository, times(4)).insert(any())
-     * }
-     * 
-    /**
-     * Tests the behavior of deleting a task by its ID when the task is not found.
-     * It ensures that the `deleteTaskById` function does not call the delete operation
-     * on the repository if the task with the specified ID does not exist.
-     */
-     * @Test
-     * fun deleteTaskById_taskNotFound_doesNotCallDelete() = runTest {
-     * whenever(repository.getTaskById(99)).thenReturn(null)
-     * viewModel.deleteTaskById(99)
-     * verify(repository, never()).delete(any())
-     * }
     @Test
     fun addTask_allValidPriorities_succeed() = runTest {
         for (priority in 0..3) {

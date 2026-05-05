@@ -55,8 +55,36 @@ class MainActivity : AppCompatActivity() {
         }
 
         searchBar.addTextChangedListener(object : TextWatcher {
+            /**
+             * Called to notify that the text has been changed.
+             *
+             * This method is invoked after the text in the input field has been modified.
+             * It triggers the display of tasks based on the updated text.
+             *
+             * @param s The new text as an Editable, or null if no text is present.
+             */
             override fun afterTextChanged(s: Editable?) { displayTasks(s.toString()) }
+            /**
+             * Called to notify that the text has been changed.
+             *
+             * @param s The new text as a CharSequence.
+             * @param start The offset into the text where the change begins.
+             * @param before The number of characters that were replaced.
+             * @param count The number of characters that were added.
+             */
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            /**
+             * Called when an activity you launched exits, giving you the requestCode you started it with,
+             * the resultCode it returned, and any additional data from it.
+             *
+             * @param requestCode The request code passed to startActivityForResult.
+             * @param resultCode  The result code returned by the child activity.
+             * @param data        The Intent carrying the task field extras, or null.
+             *
+             * @throws IllegalStateException if the requestCode is invalid.
+             *
+             * @deprecated Use ActivityResultLauncher instead.
+             */
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
     }

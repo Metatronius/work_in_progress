@@ -56,6 +56,44 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
     fun completeTask(task: Task) = viewModelScope.launch {
         taskRepository.update(task.copy(progress = (task.progress + 1) % 2))
     }
+
+    /**
+     * Updates an existing task in the database with new field values.
+     *
+     * @param id       The primary key of the task to update.
+     * @param title    Updated title.
+     * @param notes    Updated notes.
+     * @param priority Updated numeric priority (0-3).
+     * @param due      Updated due date string, or null.
+     * @param remind   Updated reminder flag.
+     * @param progress Current progress value.
+     * @param target   Target progress value.
+     */
+    fun editTask(
+        id: Int,
+        title: String,
+        notes: String,
+        priority: Int,
+        due: String?,
+        remind: Boolean,
+        progress: Int,
+        target: Int
+    ) {
+        viewModelScope.launch {
+            taskRepository.update(
+                Task(
+                    id       = id,
+                    title    = title,
+                    notes    = notes,
+                    priority = priority,
+                    due      = due?.takeIf { it.isNotBlank() },
+                    remind   = remind,
+                    progress = progress,
+                    target   = target
+                )
+            )
+        }
+    }
 }
 
 class TaskViewModelFactory(private val repository: TaskRepository) : ViewModelProvider.Factory {

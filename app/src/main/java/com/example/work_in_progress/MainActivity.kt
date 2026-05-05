@@ -23,6 +23,8 @@ class MainActivity : AppCompatActivity() {
     companion object {
         /** Request code used when launching [AddTask] for a result. */
         private const val REQUEST_ADD_TASK = 1
+        /** Request code used when launching [EditTask] for a result. */
+        private const val REQUEST_EDIT_TASK = 2
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,6 +73,21 @@ class MainActivity : AppCompatActivity() {
             )
             viewModel.addTask(params)
         }
+
+        if (requestCode == REQUEST_EDIT_TASK && resultCode == Activity.RESULT_OK) {
+            val id       = data?.getIntExtra("TASK_ID", -1) ?: -1
+            val title    = data?.getStringExtra("TITLE") ?: ""
+            val notes    = data?.getStringExtra("NOTES") ?: ""
+            val priority = data?.getIntExtra("PRIORITY", 0) ?: 0
+            val due      = data?.getStringExtra("DATE")
+            val remind   = data?.getBooleanExtra("REMIND", false) ?: false
+            val progress = data?.getIntExtra("PROGRESS", 0) ?: 0
+            val target   = data?.getIntExtra("TARGET", 1) ?: 1
+
+            if (id != -1) {
+                viewModel.editTask(id, title, notes, priority, due, remind, progress, target)
+            }
+        }
     }
 
     private fun displayTasks(query: String) {
@@ -106,11 +123,40 @@ class MainActivity : AppCompatActivity() {
                     startActivity(intent)
                 }
                 setOnLongClickListener {
+                    val options = arrayOf("Edit", "Delete")
                     android.app.AlertDialog.Builder(this@MainActivity)
-                        .setTitle("Delete Task")
-                        .setMessage("Are you sure you want to delete \"${task.title}\"?")
-                        .setPositiveButton("Delete") { _, _ -> viewModel.deleteTask(task) }
-                        .setNegativeButton("Cancel", null)
+                        .setTitle(task.title)
+                        .setItems(options) { _, which ->
+                            when (which) {
+                                0 -> {
+                                    // Launch EditTask screen with existing task data
+                                    val priorityLabel = when (task.priority) {
+                                        1 -> "Low"; 2 -> "Medium"; 3 -> "High"; else -> "None"
+                                    }
+                                    val intent = Intent(this@MainActivity, EditTask::class.java).apply {
+                                        putExtra("TASK_ID",  task.id)
+                                        putExtra("TITLE",    task.title)
+                                        putExtra("DATE",     task.due ?: "")
+                                        putExtra("PRIORITY", priorityLabel)
+                                        putExtra("NOTES",    task.notes)
+                                        putExtra("REMIND",   task.remind)
+                                        putExtra("PROGRESS", task.progress)
+                                        putExtra("TARGET",   task.target)
+                                    }
+                                    @Suppress("DEPRECATION")
+                                    startActivityForResult(intent, REQUEST_EDIT_TASK)
+                                }
+                                1 -> {
+                                    // Confirm before deleting
+                                    android.app.AlertDialog.Builder(this@MainActivity)
+                                        .setTitle("Delete Task")
+                                        .setMessage("Are you sure you want to delete \"${task.title}\"?")
+                                        .setPositiveButton("Delete") { _, _ -> viewModel.deleteTask(task) }
+                                        .setNegativeButton("Cancel", null)
+                                        .show()
+                                }
+                            }
+                        }
                         .show()
                     true
                 }

@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      models: read
 
     steps:
       - uses: actions/checkout@v4
@@ -38,9 +39,9 @@ jobs:
           find . -name "*.kt" -not -path "./.git/*" -print0 \
             | xargs -0 python3 .github/scripts/insert_kdoc.py
 
-      - name: Generate KDoc comments via OpenAI
+      - name: Generate KDoc comments via GitHub Models (Copilot)
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           pip install --quiet openai
           find . -name "*.kt" -not -path "./.git/*" -print0 \

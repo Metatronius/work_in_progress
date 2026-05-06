@@ -25,11 +25,8 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
      */
     fun addTask(newTask: TaskParams) {
         require(newTask.title.isNotBlank() && newTask.title.length in 0..30) { "Title must not be blank or exceed 30 characters." }
-        if (newTask.due !== null) {
-            DataUtil.processDate(newTask.due)?.let { result ->
-                throw IllegalArgumentException(result)
-            }
-        }
+        if (newTask.due !== null)
+            DataUtil.validateDate(newTask.due)
 
         viewModelScope.launch {
             taskRepository.insert(

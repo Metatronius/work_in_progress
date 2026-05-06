@@ -19,13 +19,11 @@ object DataUtil {
         return getPriority(priority).ordinal
     }
 
-    fun processDate(date: String): String? {
+    fun validateDate(date: String) {
         val dateInt = date.split("/").map { it.toInt() }
-        if (!dateFormat.matches(date)) { return "Title must match format: mm/dd/yyyy" }
+        if (!dateFormat.matches(date)) { throw IllegalArgumentException("Title must match format: mm/dd/yyyy") }
 
-        if(dateInt[0] !in 1..12) { return "Month must be between 1 and 12" }
-        if (dateInt[1] !in 1..31) { return "Day must be between 1 and 31" }
-
-        return null
+        if(dateInt[0] !in 1..12) { throw IllegalArgumentException("Month must be between 1 and 12") }
+        if (dateInt[1] !in 1..31) { throw IllegalArgumentException("Day must be between 1 and 31") }
     }
 }

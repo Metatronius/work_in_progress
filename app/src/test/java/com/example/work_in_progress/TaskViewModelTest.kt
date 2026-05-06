@@ -97,6 +97,13 @@ class TaskViewModelTest {
         verify(repository).update(task.copy(progress = 1))
     }
 
+    /**
+     * Tests the `completeTask` function to ensure that completing a task toggles its progress
+     * from 1 to 0.
+     *
+     * This test verifies that when a task with a progress of 1 is completed, the repository
+     * is called to update the task's progress to 0.
+     */
     @Test
     fun completeTask_togglesProgressFrom1To0() = runTest {
         val task = Task(id = 1, title = "Task", progress = 1)

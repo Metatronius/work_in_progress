@@ -34,18 +34,18 @@ jobs:
             mv "$tmp" "$file"
           done < <(find . -name "*.kt" -not -path "./.git/*" -print0)
 
-      - name: Insert KDoc stubs for undocumented functions and classes
-        run: |
-          find . -name "*.kt" -not -path "./.git/*" -print0 \
-            | xargs -0 python3 .github/scripts/insert_kdoc.py
+#      - name: Insert KDoc stubs for undocumented functions and classes
+#        run: |
+#          find . -name "*.kt" -not -path "./.git/*" -print0 \
+#            | xargs -0 python3 .github/scripts/insert_kdoc.py
 
-      - name: Generate KDoc comments via GitHub Models (Copilot)
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          pip install --quiet openai
-          find . -name "*.kt" -not -path "./.git/*" -print0 \
-            | xargs -0 python3 .github/scripts/generate_kdoc.py
+#      - name: Generate KDoc comments via GitHub Models (Copilot)
+#        env:
+#          GITHUB_TOKEN: ${{ github.token }}
+#        run: |
+#          pip install --quiet openai
+#          find . -name "*.kt" -not -path "./.git/*" -print0 \
+#            | xargs -0 python3 .github/scripts/generate_kdoc.py
 
       - name: Commit changes if any
         run: |

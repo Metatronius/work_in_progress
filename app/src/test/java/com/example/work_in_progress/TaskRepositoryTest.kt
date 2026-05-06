@@ -17,43 +17,14 @@ import org.mockito.kotlin.*
  * This class sets up the necessary mocks and tests the interaction between
  * the repository and the data access object (DAO).
  */
- * class TaskRepositoryTest {
- * private val taskDao: TaskDao = mock()
- * private lateinit var repository: TaskRepository
- * 
-/**
- * Initializes the test environment by mocking the [TaskDao] behavior
- * and creating an instance of [TaskRepository].
- */
- * @Before
- * fun setup() {
- * whenever(taskDao.getAllTasks()).thenReturn(flowOf(emptyList()))
- * repository = TaskRepository(taskDao)
- * }
- * 
-/**
- * Tests that the insert operation in [TaskRepository] correctly
- * delegates the call to the [TaskDao].
- *
- * This test verifies that when a task is inserted, the corresponding
- * method in the DAO is invoked as expected.
- */
- * @Test
- * fun insert_delegatesToDao() = runTest {
- * val task = Task(id = 1, title = "Test")
 class TaskRepositoryTest {
     private val taskDao: TaskDao = mock()
     private lateinit var repository: TaskRepository
 
+
     /**
-     * Tests that the `insert` function of the `TaskRepository` correctly delegates the
-     * task insertion to the `taskDao`.
-     *
-     * This test verifies that when a task is inserted into the repository,
-     * the corresponding method in the data access object (DAO) is called with the
-     * same task.
-     *
-     * @throws Exception if the test fails due to unexpected behavior.
+     * Initializes the test environment by mocking the [TaskDao] behavior
+     * and creating an instance of [TaskRepository].
      */
     @Before
     fun setup() {
@@ -62,9 +33,11 @@ class TaskRepositoryTest {
     }
 
     /**
-     * Tests that the `update` function of the repository correctly delegates the call to the `updateTask` method of the DAO.
+     * Tests that the insert operation in [TaskRepository] correctly
+     * delegates the call to the [TaskDao].
      *
-     * This function creates a `Task` object with an updated title and verifies that the DAO's `updateTask` method is invoked with the correct task.
+     * This test verifies that when a task is inserted, the corresponding
+     * method in the DAO is invoked as expected.
      */
     @Test
     fun insert_delegatesToDao() = runTest {

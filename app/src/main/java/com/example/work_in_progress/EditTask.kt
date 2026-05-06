@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.work_in_progress.extensions.getTaskViewModel
+import com.example.work_in_progress.util.DataUtil
 
 /**
  * Activity for editing an existing task.
@@ -69,12 +70,7 @@ class EditTask : AppCompatActivity() {
                 findViewById<RadioButton>(selectedPriorityId).text.toString()
             } else "None"
 
-            val priorityValue = when (priorityLabel) {
-                "Low" -> 1
-                "Medium" -> 2
-                "High" -> 3
-                else -> 0
-            }
+            val priorityValue = DataUtil.getPriorityValue(priorityLabel)
 
             val resultIntent = Intent().apply {
                 putExtra("TASK_ID", taskId)

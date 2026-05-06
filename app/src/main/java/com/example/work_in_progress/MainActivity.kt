@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.work_in_progress.database.Task
 import com.example.work_in_progress.database.TaskParams
 import com.example.work_in_progress.extensions.getTaskViewModel
+import com.example.work_in_progress.util.DataUtil
+import java.security.InvalidParameterException
 
 /**
  * Main screen that displays all tasks in a scrollable list, provides a search bar for
@@ -33,7 +35,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Inflates the layout, binds UI views, observes the task list [LiveData], and wires up
+     * Inflates the layout, binds UI views, observes the task list, and wires up
      * the add-task button and search bar listeners.
      *
      * @param savedInstanceState Previously saved instance state, or null.
@@ -71,17 +73,12 @@ class MainActivity : AppCompatActivity() {
              *
              * @param s The new text as a CharSequence.
              * @param start The offset into the text where the change begins.
-             * @param before The number of characters that were replaced.
              * @param count The number of characters that were added.
              */
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             /**
              * Called when an activity you launched exits, giving you the requestCode you started it with,
              * the resultCode it returned, and any additional data from it.
-             *
-             * @param requestCode The request code passed to startActivityForResult.
-             * @param resultCode  The result code returned by the child activity.
-             * @param data        The Intent carrying the task field extras, or null.
              *
              * @throws IllegalStateException if the requestCode is invalid.
              *
@@ -104,12 +101,7 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == REQUEST_ADD_TASK && resultCode == Activity.RESULT_OK) {
-            val priorityValue = when (data?.getStringExtra("PRIORITY")) {
-                "Low"    -> 1
-                "Medium" -> 2
-                "High"   -> 3
-                else     -> 0
-            }
+            val priorityValue = DataUtil.getPriority(data?.getStringExtra("PRIORITY") ?: "None")
             val params = TaskParams(
                 title    = data?.getStringExtra("TITLE") ?: "",
                 notes    = data?.getStringExtra("NOTES") ?: "",
@@ -163,9 +155,7 @@ class MainActivity : AppCompatActivity() {
                 textSize = 18f
                 setPadding(8, 0, 0, 0)
                 setOnClickListener {
-                    val priorityLabel = when (task.priority) {
-                        1 -> "Low"; 2 -> "Medium"; 3 -> "High"; else -> "None"
-                    }
+                    val priorityLabel = DataUtil.getPriorityName(task.priority)
                     val intent = Intent(this@MainActivity, TaskDetail::class.java).apply {
                         putExtra("TITLE",    task.title)
                         putExtra("DATE",     task.due ?: "")
@@ -182,9 +172,7 @@ class MainActivity : AppCompatActivity() {
                             when (which) {
                                 0 -> {
                                     // Launch EditTask screen with existing task data
-                                    val priorityLabel = when (task.priority) {
-                                        1 -> "Low"; 2 -> "Medium"; 3 -> "High"; else -> "None"
-                                    }
+                                    val priorityLabel = DataUtil.getPriorityName(task.priority)
                                     val intent = Intent(this@MainActivity, EditTask::class.java).apply {
                                         putExtra("TASK_ID",  task.id)
                                         putExtra("TITLE",    task.title)

@@ -2,6 +2,7 @@
 package com.example.work_in_progress.database
 
 import androidx.lifecycle.*
+import com.example.work_in_progress.util.DataUtil
 import kotlinx.coroutines.launch
 
 /**
@@ -24,14 +25,18 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
      */
     fun addTask(newTask: TaskParams) {
         require(newTask.title.isNotBlank() && newTask.title.length in 0..30) { "Title must not be blank or exceed 30 characters." }
-        require(newTask.priority in 0..3) { "Priority must be between 0 and 3." }
+        if (newTask.due !== null) {
+            DataUtil.processDate(newTask.due)?.let { result ->
+                throw IllegalArgumentException(result)
+            }
+        }
 
         viewModelScope.launch {
             taskRepository.insert(
                 Task(
                     title = newTask.title,
                     notes = newTask.notes,
-                    priority = newTask.priority,
+                    priority = newTask.priority.ordinal,
                     due = newTask.due,
                     remind = newTask.remind,
                     progress = newTask.progress,

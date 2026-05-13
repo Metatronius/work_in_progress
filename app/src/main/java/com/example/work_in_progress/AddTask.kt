@@ -1,3 +1,4 @@
+/** Activity that presents a form for the user to enter a new task and return it to [MainActivity]. */
 package com.example.work_in_progress
 
 import android.app.Activity
@@ -6,6 +7,10 @@ import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 
+/**
+ * Screen that collects task details (title, date, priority, notes, reminder) from the user
+ * and returns them to the caller via [android.app.Activity.setResult].
+ */
 class AddTask : AppCompatActivity() {
 
     /**

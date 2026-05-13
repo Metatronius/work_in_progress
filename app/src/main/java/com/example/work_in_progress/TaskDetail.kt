@@ -1,3 +1,4 @@
+/** Activity that displays the full details of a single task in a read-only view. */
 package com.example.work_in_progress
 
 import android.os.Bundle
@@ -5,6 +6,7 @@ import android.view.MenuItem
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
+/** Read-only detail screen that shows the title, due date, priority, and notes of a task. */
 class TaskDetail : AppCompatActivity() {
 
     /**

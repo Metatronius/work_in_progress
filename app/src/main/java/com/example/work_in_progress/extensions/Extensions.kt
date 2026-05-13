@@ -1,3 +1,4 @@
+/** Kotlin extension functions for Android framework types used across the application. */
 package com.example.work_in_progress.extensions
 
 import androidx.appcompat.app.AppCompatActivity

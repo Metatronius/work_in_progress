@@ -9,8 +9,6 @@ import org.junit.Test
  */
 class DataUtilTest {
 
-    // getPriority(String) tests
-
     @Test
     fun getPriority_string_none() {
         val result = DataUtil.getPriority("NONE")

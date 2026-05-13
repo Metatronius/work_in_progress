@@ -39,4 +39,56 @@
         android:layout_marginTop="8dp"
         android:text="Notes: "/>
 
+    <TextView
+        android:id="@+id/completedTasksText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Completed Tasks: 0"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/pendingTasksText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Pending Tasks: 0"
+        android:textStyle="bold"/>
+
+    <ProgressBar
+        android:id="@+id/taskProgressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:layout_marginTop="12dp"
+        android:max="100"
+        android:progress="0"/>
+
+    <!-- buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="24dp">
+
+        <Button
+            android:id="@+id/editButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Edit"
+            android:backgroundTint="#2196F3"
+            android:textColor="#FFFFFF"/>
+
+        <Button
+            android:id="@+id/deleteButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Delete"
+            android:backgroundTint="#2196F3"
+            android:textColor="#FFFFFF"/>
+    </LinearLayout>
+
 </LinearLayout>

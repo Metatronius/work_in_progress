@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -50,6 +51,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
 
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

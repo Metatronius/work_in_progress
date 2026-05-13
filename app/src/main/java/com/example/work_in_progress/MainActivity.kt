@@ -8,8 +8,8 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.example.work_in_progress.database.Task
-import com.example.work_in_progress.database.TaskParams
+import com.example.work_in_progress.entities.Task
+import com.example.work_in_progress.dtos.TaskParams
 import com.example.work_in_progress.extensions.getTaskViewModel
 import com.example.work_in_progress.util.DataUtil
 import java.security.InvalidParameterException

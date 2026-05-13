@@ -1,11 +1,11 @@
-/** Immutable value object carrying the user-supplied fields needed to create a new [Task]. */
-package com.example.work_in_progress.database
+package com.example.work_in_progress.dtos
 
 import com.example.work_in_progress.util.Priority
 
+/** Immutable value object carrying the user-supplied fields needed to create a new [Task]. */
 /**
- * Immutable parameter object used to create a new [Task] without exposing the
- * auto-generated [Task.id] or the [Task.created] timestamp to callers.
+ * Immutable parameter object used to create a new [com.example.work_in_progress.entities.Task] without exposing the
+ * auto-generated [com.example.work_in_progress.entities.Task.id] or the [com.example.work_in_progress.entities.Task.created] timestamp to callers.
  *
  * @property title    Short title / name of the task.
  * @property notes    Optional longer description or notes.

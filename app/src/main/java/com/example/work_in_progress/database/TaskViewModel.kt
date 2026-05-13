@@ -1,7 +1,9 @@
-/** ViewModel and its factory for managing [Task] data exposed to the UI layer. */
+/** ViewModel and its factory for managing [com.example.work_in_progress.entities.Task] data exposed to the UI layer. */
 package com.example.work_in_progress.database
 
 import androidx.lifecycle.*
+import com.example.work_in_progress.dtos.TaskParams
+import com.example.work_in_progress.entities.Task
 import com.example.work_in_progress.util.DataUtil
 import kotlinx.coroutines.launch
 
@@ -99,14 +101,14 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
         viewModelScope.launch {
             taskRepository.update(
                 Task(
-                    id       = id,
-                    title    = title,
-                    notes    = notes,
+                    id = id,
+                    title = title,
+                    notes = notes,
                     priority = priority,
-                    due      = due?.takeIf { it.isNotBlank() },
-                    remind   = remind,
+                    due = due?.takeIf { it.isNotBlank() },
+                    remind = remind,
                     progress = progress,
-                    target   = target
+                    target = target
                 )
             )
         }

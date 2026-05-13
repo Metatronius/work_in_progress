@@ -1,10 +1,11 @@
 /** Repository layer that abstracts [TaskDao] access from the rest of the application. */
 package com.example.work_in_progress.database
 
+import com.example.work_in_progress.entities.Task
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Repository mediating access to [Task] data via [TaskDao].
+ * Repository mediating access to [com.example.work_in_progress.entities.Task] data via [TaskDao].
  * Acts as the single source of truth for all task-related data operations,
  * shielding the ViewModel from direct database access.
  *

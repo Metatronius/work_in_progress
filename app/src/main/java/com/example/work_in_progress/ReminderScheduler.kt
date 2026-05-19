@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Metatronius. All rights reserved.
+
 package com.example.work_in_progress
 
 import android.app.AlarmManager

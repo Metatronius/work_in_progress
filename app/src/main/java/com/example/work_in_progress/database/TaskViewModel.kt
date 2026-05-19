@@ -40,7 +40,10 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
                     target = 1
                 )
             )
-            onInserted?.invoke(Math.toIntExact(insertedId))
+            require(insertedId in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
+                "Inserted task id out of Int range: $insertedId"
+            }
+            onInserted?.invoke(insertedId.toInt())
         }
     }
 

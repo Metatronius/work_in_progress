@@ -3,6 +3,7 @@ package com.example.work_in_progress
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -43,6 +44,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 100)
+            }
+        }
 
         viewModel.allTasks.observe(this) { tasks ->
             renderTasks(tasks)
@@ -110,6 +118,15 @@ class MainActivity : AppCompatActivity() {
                 remind   = data?.getBooleanExtra("REMINDER", false) ?: false
             )
             viewModel.addTask(params)
+
+            if (params.remind && !params.due.isNullOrBlank()) {
+                viewModel.allTasks.observe(this) { tasks ->
+                    val newTask = tasks.firstOrNull { it.title == params.title && it.remind }
+                    if (newTask != null) {
+                        ReminderScheduler.schedule(this, newTask.id, newTask.title, newTask.due ?: "")
+                    }
+                }
+            }
         }
 
         if (requestCode == REQUEST_EDIT_TASK && resultCode == Activity.RESULT_OK) {
@@ -171,7 +188,6 @@ class MainActivity : AppCompatActivity() {
                         .setItems(options) { _, which ->
                             when (which) {
                                 0 -> {
-                                    // Launch EditTask screen with existing task data
                                     val priorityLabel = DataUtil.getPriorityName(task.priority)
                                     val intent = Intent(this@MainActivity, EditTask::class.java).apply {
                                         putExtra("TASK_ID",  task.id)
@@ -187,7 +203,6 @@ class MainActivity : AppCompatActivity() {
                                     startActivityForResult(intent, REQUEST_EDIT_TASK)
                                 }
                                 1 -> {
-                                    // Confirm before deleting
                                     android.app.AlertDialog.Builder(this@MainActivity)
                                         .setTitle("Delete Task")
                                         .setMessage("Are you sure you want to delete \"${task.title}\"?")

@@ -118,8 +118,10 @@ class MainActivity : AppCompatActivity() {
                 remind   = data?.getBooleanExtra("REMINDER", false) ?: false
             )
             viewModel.addTask(params) { taskId ->
-                if (params.remind && !params.due.isNullOrBlank()) {
-                    ReminderScheduler.schedule(this, taskId, params.title, params.due)
+                if (params.remind && !params.due.isNullOrBlank() &&
+                    taskId >= Int.MIN_VALUE && taskId <= Int.MAX_VALUE
+                ) {
+                    ReminderScheduler.schedule(this, taskId.toInt(), params.title, params.due)
                 }
             }
         }

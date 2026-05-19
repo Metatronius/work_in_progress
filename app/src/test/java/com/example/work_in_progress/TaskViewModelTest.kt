@@ -5,6 +5,8 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import com.example.work_in_progress.database.*
+import com.example.work_in_progress.dtos.TaskParams
+import com.example.work_in_progress.entities.Task
 import com.example.work_in_progress.util.Priority
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.flowOf

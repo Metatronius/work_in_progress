@@ -23,13 +23,13 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
      *
      * @param newTask The parameter object containing the task fields to persist.
      */
-    fun addTask(newTask: TaskParams) {
+    fun addTask(newTask: TaskParams, onInserted: ((Int) -> Unit)? = null) {
         require(newTask.title.isNotBlank() && newTask.title.length in 0..30) { "Title must not be blank or exceed 30 characters." }
         if (newTask.due !== null)
             DataUtil.validateDate(newTask.due)
 
         viewModelScope.launch {
-            taskRepository.insert(
+            val insertedId = taskRepository.insert(
                 Task(
                     title = newTask.title,
                     notes = newTask.notes,
@@ -40,6 +40,7 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
                     target = 1
                 )
             )
+            onInserted?.invoke(insertedId.toInt())
         }
     }
 

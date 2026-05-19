@@ -28,7 +28,7 @@ interface TaskDao {
      * @param task The task to persist.
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTask(task: Task)
+    suspend fun insertTask(task: Task): Long
 
     /**
      * Updates an existing [task] row in the database, matched by primary key.

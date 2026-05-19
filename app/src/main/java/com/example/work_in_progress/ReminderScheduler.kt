@@ -28,7 +28,7 @@ object ReminderScheduler {
         val format = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
         val date = try { format.parse(dueDate) } catch (e: Exception) { null } ?: return
 
-        // emind 1 day before at 9am
+        // remind 1 day before at 9am.
         val reminderTime = Calendar.getInstance().apply {
             time = date
             add(Calendar.DAY_OF_YEAR, -1)

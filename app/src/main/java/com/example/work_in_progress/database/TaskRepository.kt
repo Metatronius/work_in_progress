@@ -19,7 +19,7 @@ class TaskRepository(private val taskDao: TaskDao) {
      *
      * @param task The task to persist.
      */
-    suspend fun insert(task: Task) = taskDao.insertTask(task)
+    suspend fun insert(task: Task): Long = taskDao.insertTask(task)
 
     /**
      * Updates an existing [task] in the database, matched by [Task.id].

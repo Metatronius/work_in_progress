@@ -117,14 +117,9 @@ class MainActivity : AppCompatActivity() {
                 due      = data?.getStringExtra("DATE")?.takeIf { it.isNotBlank() },
                 remind   = data?.getBooleanExtra("REMINDER", false) ?: false
             )
-            viewModel.addTask(params)
-
-            if (params.remind && !params.due.isNullOrBlank()) {
-                viewModel.allTasks.observe(this) { tasks ->
-                    val newTask = tasks.firstOrNull { it.title == params.title && it.remind }
-                    if (newTask != null) {
-                        ReminderScheduler.schedule(this, newTask.id, newTask.title, newTask.due ?: "")
-                    }
+            viewModel.addTask(params) { taskId ->
+                if (params.remind && !params.due.isNullOrBlank()) {
+                    ReminderScheduler.schedule(this, taskId, params.title, params.due)
                 }
             }
         }
@@ -141,6 +136,10 @@ class MainActivity : AppCompatActivity() {
 
             if (id != -1) {
                 viewModel.editTask(id, title, notes, priority, due, remind, progress, target)
+                ReminderScheduler.cancel(this, id)
+                if (remind && !due.isNullOrBlank()) {
+                    ReminderScheduler.schedule(this, id, title, due)
+                }
             }
         }
     }
@@ -206,7 +205,10 @@ class MainActivity : AppCompatActivity() {
                                     android.app.AlertDialog.Builder(this@MainActivity)
                                         .setTitle("Delete Task")
                                         .setMessage("Are you sure you want to delete \"${task.title}\"?")
-                                        .setPositiveButton("Delete") { _, _ -> viewModel.deleteTask(task) }
+                                        .setPositiveButton("Delete") { _, _ ->
+                                            ReminderScheduler.cancel(this@MainActivity, task.id)
+                                            viewModel.deleteTask(task)
+                                        }
                                         .setNegativeButton("Cancel", null)
                                         .show()
                                 }

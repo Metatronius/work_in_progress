@@ -192,6 +192,18 @@ class TaskViewModelTest {
         })
     }
 
+    @Test
+    fun addTask_invokesOnInsertedWithInsertedId() = runTest {
+        whenever(repository.insert(any())).thenReturn(42L)
+        var insertedId: Int? = null
+
+        viewModel.addTask(TaskParams(title = "Task")) { id ->
+            insertedId = id
+        }
+
+        Assert.assertEquals(42, insertedId)
+    }
+
     // allTasks LiveData
 
     @Test

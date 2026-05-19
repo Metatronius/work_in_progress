@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.work_in_progress.database.Task
@@ -122,6 +123,9 @@ class MainActivity : AppCompatActivity() {
                     runCatching { Math.toIntExact(taskId) }
                         .onSuccess { intTaskId ->
                             ReminderScheduler.schedule(this, intTaskId, params.title, params.due)
+                        }
+                        .onFailure {
+                            Log.w("MainActivity", "Could not schedule reminder for task id=$taskId", it)
                         }
                 }
             }

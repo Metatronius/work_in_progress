@@ -1,0 +1,54 @@
+package com.example.work_in_progress
+
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import java.text.SimpleDateFormat
+import java.util.*
+
+object ReminderScheduler {
+
+    fun schedule(context: Context, taskId: Int, taskTitle: String, dueDate: String) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val intent = Intent(context, ReminderReceiver::class.java).apply {
+            putExtra("TASK_TITLE", taskTitle)
+            putExtra("TASK_ID", taskId)
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context, taskId, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Parse the due date
+        val format = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+        val date = try { format.parse(dueDate) } catch (e: Exception) { null } ?: return
+
+        // emind 1 day before at 9am
+        val reminderTime = Calendar.getInstance().apply {
+            time = date
+            add(Calendar.DAY_OF_YEAR, -1)
+            set(Calendar.HOUR_OF_DAY, 9)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+        }.timeInMillis
+
+        if (alarmManager.canScheduleExactAlarms()) {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, reminderTime, pendingIntent)
+        } else {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, reminderTime, pendingIntent)
+        }
+    }
+
+    fun cancel(context: Context, taskId: Int) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, ReminderReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context, taskId, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.cancel(pendingIntent)
+    }
+}

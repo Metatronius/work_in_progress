@@ -1,5 +1,7 @@
 package com.example.work_in_progress.util
 
+import com.example.work_in_progress.dtos.TaskParams
+
 object DataUtil {
     val dateFormat = Regex("\\d\\d?/\\d\\d?/\\d\\d\\d\\d")
 
@@ -7,7 +9,7 @@ object DataUtil {
         return Priority.valueOf(priority.trim().uppercase())
     }
     fun getPriority(priority: Int): Priority {
-        if (priority > 3) throw IllegalArgumentException("Priority must be between 0 and 3.")
+        require(priority in 0..3) { "Priority must be between 0 and 3." }
         return Priority.entries[priority]
     }
     fun getPriorityName(priority: Int): String {
@@ -19,9 +21,19 @@ object DataUtil {
 
     fun validateDate(date: String) {
         val dateInt = date.split("/").map { it.toInt() }
-        if (!dateFormat.matches(date)) { throw IllegalArgumentException("Title must match format: mm/dd/yyyy") }
+        require(dateFormat.matches(date)) { "Title must match format: mm/dd/yyyy" }
 
-        if(dateInt[0] !in 1..12) { throw IllegalArgumentException("Month must be between 1 and 12") }
-        if (dateInt[1] !in 1..31) { throw IllegalArgumentException("Day must be between 1 and 31") }
+        require(dateInt[0] in 1..12) { "Month must be between 1 and 12" }
+        require(dateInt[1] in 1..31) { "Day must be between 1 and 31" }
+    }
+
+    fun validateTitle(title: String) {
+        require(title.isNotBlank() && title.length in 0..30) { "Title must not be blank or exceed 30 characters." }
+    }
+
+    fun validateTask(task: TaskParams) {
+        if (task.due != null)
+            validateDate(task.due)
+        validateTitle(task.title)
     }
 }

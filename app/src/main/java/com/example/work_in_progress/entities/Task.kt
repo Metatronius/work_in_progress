@@ -4,9 +4,10 @@ package com.example.work_in_progress.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.work_in_progress.dtos.TaskParams
+import com.example.work_in_progress.util.DataUtil
 import java.util.Date
 
-/** Room entity definition for a task stored in the "tasks" table. */
 /**
  * Room entity representing a single task stored in the "tasks" table.
  *
@@ -30,5 +31,16 @@ data class Task(
     val due: String? = null,
     val remind: Boolean = false,
     val progress: Int = 0,
-    val target: Int = 1
-)
+    val target: Int = 1,
+) {
+    constructor(params: TaskParams) : this(
+        title = params.title,
+        notes = params.notes,
+        priority = params.priority.ordinal,
+        due = params.due,
+        remind = params.remind,
+        progress = params.progress
+    ) {
+        DataUtil.validateTask(params)
+    }
+}

@@ -1,5 +1,6 @@
 package com.example.work_in_progress.database
 
+import com.example.work_in_progress.entities.Task
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -29,57 +30,63 @@ class TaskRepositoryTest {
     }
 
     @Test
-    fun repositoryInsert_shouldDelegateToDao() = runBlocking {
-        val task = Task(
-            title = "Test task",
-            priority = 2,
-            notes = "Test notes",
-            due = "2026-05-15",
-            remind = true
-        )
+    fun repositoryInsert_shouldDelegateToDao() {
+        runBlocking {
+            val task = Task(
+                title = "Test task",
+                priority = 2,
+                notes = "Test notes",
+                due = "2026-05-15",
+                remind = true
+            )
 
-        repository.insert(task)
+            repository.insert(task)
 
-        verify(mockTaskDao).insertTask(task)
+            verify(mockTaskDao).insertTask(task)
+        }
     }
 
     @Test
-    fun repositoryUpdate_shouldDelegateToDao() = runBlocking {
-        val task = Task(
-            id = 1,
-            title = "Updated task",
-            priority = 3,
-            progress = 1
-        )
+    fun repositoryUpdate_shouldDelegateToDao() {
+        runBlocking {
+            val task = Task(
+                id = 1,
+                title = "Updated task",
+                priority = 3,
+                progress = 1
+            )
 
-        repository.update(task)
+            repository.update(task)
 
-        verify(mockTaskDao).updateTask(task)
+            verify(mockTaskDao).updateTask(task)
+        }
     }
 
     @Test
-    fun repositoryDelete_shouldDelegateToDao() = runBlocking {
-        val task = Task(
-            id = 1,
-            title = "Task to delete",
-            priority = 1
-        )
+    fun repositoryDelete_shouldDelegateToDao() {
+        runBlocking {
+            val task = Task(
+                id = 1,
+                title = "Task to delete",
+                priority = 1
+            )
 
-        repository.delete(task)
+            repository.delete(task)
 
-        verify(mockTaskDao).deleteTask(task)
+            verify(mockTaskDao).deleteTask(task)
+        }
     }
 
     @Test
-    fun repositoryAllTasks_shouldExposeAllTasksFlowFromDao() = runBlocking {
-        // When: The repository is created with a mocked DAO that returns a Flow
-        val mockFlow = flowOf(listOf(Task(title = "Test task")))
-        `when`(mockTaskDao.getAllTasks()).thenReturn(mockFlow)
-        val repo = TaskRepository(mockTaskDao)
+    fun repositoryAllTasks_shouldExposeAllTasksFlowFromDao() {
+        runBlocking {
+            val mockFlow = flowOf(listOf(Task(title = "Test task")))
+            `when`(mockTaskDao.getAllTasks()).thenReturn(mockFlow)
+            val repo = TaskRepository(mockTaskDao)
 
-        // Then: The repository's allTasks Flow should emit the mocked data
-        val result = repo.allTasks.first()
-        assertEquals(1, result.size)
-        assertEquals("Test task", result[0].title)
+            val result = repo.allTasks.first()
+            assertEquals(1, result.size)
+            assertEquals("Test task", result[0].title)
+        }
     }
 }

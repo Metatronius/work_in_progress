@@ -32,6 +32,7 @@ class EditTask : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_task)
 
+        // TODO: BUG - Line 35: viewModel is declared by lazy but never used. Activity just returns Intent result, doesn't use ViewModel. Remove if not needed.
         val viewModel by lazy { getTaskViewModel() }
 
         val taskId = intent.getIntExtra("TASK_ID", -1)
@@ -60,6 +61,7 @@ class EditTask : AppCompatActivity() {
             "High" -> priorityGroup.check(R.id.editHighPriority)
             "Medium" -> priorityGroup.check(R.id.editMediumPriority)
             "Low" -> priorityGroup.check(R.id.editLowPriority)
+            // TODO: BUG - Line 63: Missing "None" priority case. If taskPriority is "None", no radio button gets checked.
         }
 
         saveButton.setOnClickListener {

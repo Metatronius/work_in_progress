@@ -34,6 +34,8 @@ class AddTask : AppCompatActivity() {
 
         saveButton.setOnClickListener {
 
+            // TODO: BUG - AddTask: Missing UI-level input validation. AddTask doesn't prevent submission of blank titles or titles > 30 chars.
+            // Validation happens in ViewModel instead, with no user feedback. Should validate and show error dialog before returning Intent result.
             val title = taskTitle.text.toString()
             val date = taskDate.text.toString()
             val notes = taskNotes.text.toString()

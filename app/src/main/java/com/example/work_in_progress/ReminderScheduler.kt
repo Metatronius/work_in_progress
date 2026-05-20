@@ -25,10 +25,12 @@ object ReminderScheduler {
         )
 
         // Parse the due date
+        // TODO: BUG - Line 29: If date parsing fails, function silently returns without scheduling reminder. User won't know reminder wasn't set. Should log error or notify user.
         val format = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
         val date = try { format.parse(dueDate) } catch (e: Exception) { null } ?: return
 
         // remind 1 day before at 9am.
+        // TODO: BUG - Line 31-38: Reminder time is hardcoded to 1 day before at 9am. User cannot customize. Consider if this matches expected behavior.
         val reminderTime = Calendar.getInstance().apply {
             time = date
             add(Calendar.DAY_OF_YEAR, -1)

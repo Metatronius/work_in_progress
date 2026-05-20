@@ -7,6 +7,7 @@ object DataUtil {
         return Priority.valueOf(priority.trim().uppercase())
     }
     fun getPriority(priority: Int): Priority {
+        // TODO: BUG - Line 10-11: Only checks priority > 3 but not priority < 0. Will throw IndexOutOfBoundsException for negative values.
         if (priority > 3) throw IllegalArgumentException("Priority must be between 0 and 3.")
         return Priority.entries[priority]
     }
@@ -18,7 +19,9 @@ object DataUtil {
     }
 
     fun validateDate(date: String) {
+        // TODO: BUG - Line 21: date.split("/").map { it.toInt() } can throw NumberFormatException. Add try-catch for better error handling.
         val dateInt = date.split("/").map { it.toInt() }
+        // TODO: BUG - Line 22: Error message says "Title must match format" but this validates DATE. Should say "Date must match format: mm/dd/yyyy"
         if (!dateFormat.matches(date)) { throw IllegalArgumentException("Title must match format: mm/dd/yyyy") }
 
         if(dateInt[0] !in 1..12) { throw IllegalArgumentException("Month must be between 1 and 12") }

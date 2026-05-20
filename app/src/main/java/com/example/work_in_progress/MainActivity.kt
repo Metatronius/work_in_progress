@@ -85,8 +85,7 @@ class MainActivity : AppCompatActivity() {
              */
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             /**
-             * Called when an activity you launched exits, giving you the requestCode you started it with,
-             * the resultCode it returned, and any additional data from it.
+             * TODO: BUG - Line 83-95: This docstring is about onActivityResult, not onTextChanged (copy-paste error).
              *
              * @throws IllegalStateException if the requestCode is invalid.
              *

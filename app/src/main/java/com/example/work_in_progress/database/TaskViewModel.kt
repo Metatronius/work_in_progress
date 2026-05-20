@@ -26,6 +26,7 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
      * @param newTask The parameter object containing the task fields to persist.
      */
     fun addTask(newTask: TaskParams, onInserted: ((Int) -> Unit)? = null) {
+        // TODO: BUG - Line 29: Range includes 0 (0..30) but should be 1..30. Empty string already fails isNotBlank() check, but range should be explicit.
         require(newTask.title.isNotBlank() && newTask.title.length in 0..30) { "Title must not be blank or exceed 30 characters." }
         if (newTask.due !== null)
             DataUtil.validateDate(newTask.due)

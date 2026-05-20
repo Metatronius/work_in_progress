@@ -1,5 +1,6 @@
 package com.example.work_in_progress.database
 
+import com.example.work_in_progress.dtos.TaskParams
 import com.example.work_in_progress.util.Priority
 import org.junit.Assert
 import org.junit.Test

@@ -1,8 +1,12 @@
-/** Room entity definition for a task stored in the "tasks" table. */
-package com.example.work_in_progress.database
-import androidx.room.*
+// Copyright (c) 2026 Metatronius. All rights reserved.
+
+package com.example.work_in_progress.entities
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.util.Date
 
+/** Room entity definition for a task stored in the "tasks" table. */
 /**
  * Room entity representing a single task stored in the "tasks" table.
  *

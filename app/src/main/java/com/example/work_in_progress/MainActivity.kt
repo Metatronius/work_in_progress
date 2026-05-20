@@ -3,13 +3,14 @@ package com.example.work_in_progress
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.example.work_in_progress.database.Task
-import com.example.work_in_progress.database.TaskParams
+import com.example.work_in_progress.entities.Task
+import com.example.work_in_progress.dtos.TaskParams
 import com.example.work_in_progress.extensions.getTaskViewModel
 import com.example.work_in_progress.util.DataUtil
 import java.security.InvalidParameterException
@@ -43,6 +44,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 100)
+            }
+        }
 
         viewModel.allTasks.observe(this) { tasks ->
             renderTasks(tasks)
@@ -109,7 +117,11 @@ class MainActivity : AppCompatActivity() {
                 due      = data?.getStringExtra("DATE")?.takeIf { it.isNotBlank() },
                 remind   = data?.getBooleanExtra("REMINDER", false) ?: false
             )
-            viewModel.addTask(params)
+            viewModel.addTask(params) { taskId ->
+                if (params.remind && !params.due.isNullOrBlank()) {
+                    ReminderScheduler.schedule(this, taskId, params.title, params.due)
+                }
+            }
         }
 
         if (requestCode == REQUEST_EDIT_TASK && resultCode == Activity.RESULT_OK) {
@@ -124,6 +136,10 @@ class MainActivity : AppCompatActivity() {
 
             if (id != -1) {
                 viewModel.editTask(id, title, notes, priority, due, remind, progress, target)
+                ReminderScheduler.cancel(this, id)
+                if (remind && !due.isNullOrBlank()) {
+                    ReminderScheduler.schedule(this, id, title, due)
+                }
             }
         }
     }
@@ -171,7 +187,6 @@ class MainActivity : AppCompatActivity() {
                         .setItems(options) { _, which ->
                             when (which) {
                                 0 -> {
-                                    // Launch EditTask screen with existing task data
                                     val priorityLabel = DataUtil.getPriorityName(task.priority)
                                     val intent = Intent(this@MainActivity, EditTask::class.java).apply {
                                         putExtra("TASK_ID",  task.id)
@@ -187,11 +202,13 @@ class MainActivity : AppCompatActivity() {
                                     startActivityForResult(intent, REQUEST_EDIT_TASK)
                                 }
                                 1 -> {
-                                    // Confirm before deleting
                                     android.app.AlertDialog.Builder(this@MainActivity)
                                         .setTitle("Delete Task")
                                         .setMessage("Are you sure you want to delete \"${task.title}\"?")
-                                        .setPositiveButton("Delete") { _, _ -> viewModel.deleteTask(task) }
+                                        .setPositiveButton("Delete") { _, _ ->
+                                            ReminderScheduler.cancel(this@MainActivity, task.id)
+                                            viewModel.deleteTask(task)
+                                        }
                                         .setNegativeButton("Cancel", null)
                                         .show()
                                 }

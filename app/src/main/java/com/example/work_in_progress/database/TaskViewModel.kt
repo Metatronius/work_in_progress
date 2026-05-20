@@ -1,7 +1,9 @@
-/** ViewModel and its factory for managing [Task] data exposed to the UI layer. */
+/** ViewModel and its factory for managing [com.example.work_in_progress.entities.Task] data exposed to the UI layer. */
 package com.example.work_in_progress.database
 
 import androidx.lifecycle.*
+import com.example.work_in_progress.dtos.TaskParams
+import com.example.work_in_progress.entities.Task
 import com.example.work_in_progress.util.DataUtil
 import kotlinx.coroutines.launch
 
@@ -23,13 +25,13 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
      *
      * @param newTask The parameter object containing the task fields to persist.
      */
-    fun addTask(newTask: TaskParams) {
+    fun addTask(newTask: TaskParams, onInserted: ((Int) -> Unit)? = null) {
         require(newTask.title.isNotBlank() && newTask.title.length in 0..30) { "Title must not be blank or exceed 30 characters." }
         if (newTask.due !== null)
             DataUtil.validateDate(newTask.due)
 
         viewModelScope.launch {
-            taskRepository.insert(
+            val insertedId = taskRepository.insert(
                 Task(
                     title = newTask.title,
                     notes = newTask.notes,
@@ -40,6 +42,10 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
                     target = 1
                 )
             )
+            require(insertedId in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
+                "Inserted task id out of Int range: $insertedId"
+            }
+            onInserted?.invoke(insertedId.toInt())
         }
     }
 
@@ -99,14 +105,14 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
         viewModelScope.launch {
             taskRepository.update(
                 Task(
-                    id       = id,
-                    title    = title,
-                    notes    = notes,
+                    id = id,
+                    title = title,
+                    notes = notes,
                     priority = priority,
-                    due      = due?.takeIf { it.isNotBlank() },
-                    remind   = remind,
+                    due = due?.takeIf { it.isNotBlank() },
+                    remind = remind,
                     progress = progress,
-                    target   = target
+                    target = target
                 )
             )
         }

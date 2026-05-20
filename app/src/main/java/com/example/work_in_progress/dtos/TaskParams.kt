@@ -1,11 +1,12 @@
-/** Immutable value object carrying the user-supplied fields needed to create a new [Task]. */
-package com.example.work_in_progress.database
+// Copyright (c) 2026 Metatronius. All rights reserved.
+
+package com.example.work_in_progress.dtos
 
 import com.example.work_in_progress.util.Priority
 
 /**
  * Immutable parameter object used to create a new [Task] without exposing the
- * auto-generated [Task.id] or the [Task.created] timestamp to callers.
+ * auto-generated [id] or the [created] timestamp to callers.
  *
  * @property title    Short title / name of the task.
  * @property notes    Optional longer description or notes.

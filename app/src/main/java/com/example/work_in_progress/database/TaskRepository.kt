@@ -1,10 +1,11 @@
 /** Repository layer that abstracts [TaskDao] access from the rest of the application. */
 package com.example.work_in_progress.database
 
+import com.example.work_in_progress.entities.Task
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Repository mediating access to [Task] data via [TaskDao].
+ * Repository mediating access to [com.example.work_in_progress.entities.Task] data via [TaskDao].
  * Acts as the single source of truth for all task-related data operations,
  * shielding the ViewModel from direct database access.
  *
@@ -19,7 +20,7 @@ class TaskRepository(private val taskDao: TaskDao) {
      *
      * @param task The task to persist.
      */
-    suspend fun insert(task: Task) = taskDao.insertTask(task)
+    suspend fun insert(task: Task): Long = taskDao.insertTask(task)
 
     /**
      * Updates an existing [task] in the database, matched by [Task.id].

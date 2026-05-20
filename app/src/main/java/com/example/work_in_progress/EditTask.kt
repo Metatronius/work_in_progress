@@ -38,6 +38,7 @@ class EditTask : AppCompatActivity() {
         val taskTitle = intent.getStringExtra("TITLE") ?: ""
         val taskDate = intent.getStringExtra("DATE") ?: ""
         val taskPriority = intent.getStringExtra("PRIORITY") ?: ""
+        val taskCreated = intent.getStringExtra("CREATED") ?: ""
         val taskNotes = intent.getStringExtra("NOTES") ?: ""
         val taskRemind = intent.getBooleanExtra("REMIND", false)
         val taskProgress = intent.getIntExtra("PROGRESS", 0)
@@ -75,6 +76,7 @@ class EditTask : AppCompatActivity() {
                 putExtra("TITLE", titleField.text.toString())
                 putExtra("DATE", dateField.text.toString())
                 putExtra("PRIORITY", priorityValue)
+                putExtra("CREATED", taskCreated)
                 putExtra("NOTES", notesField.text.toString())
                 putExtra("REMIND", reminderSwitch.isChecked)
                 putExtra("PROGRESS", taskProgress)

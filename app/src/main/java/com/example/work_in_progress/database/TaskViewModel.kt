@@ -35,6 +35,14 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
             onInserted?.invoke(insertedId.toInt())
         }
     }
+    
+    /**
+     * Retrieves a task by its [id] from the database.
+     *
+     * @param id The primary key of the task to retrieve.
+     * @return The task if found, or null otherwise.
+     */
+    suspend fun getTask(id: Int): Task? = taskRepository.getTaskById(id)
 
     /**
      * Delete a task by its [id] from the database.
@@ -72,14 +80,9 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
      *
      * @param editedTask The updated task, all parameters are overwritten
      */
-    fun editTask(
-        editedTask: TaskParams
-    ) {
-        DataUtil.validateTask(editedTask)
+    fun editTask(editedTask: Task) {
         viewModelScope.launch {
-            taskRepository.update(
-                Task(editedTask)
-            )
+            taskRepository.update(editedTask)
         }
     }
 }

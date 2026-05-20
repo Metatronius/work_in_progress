@@ -129,13 +129,14 @@ class MainActivity : AppCompatActivity() {
             val title    = data?.getStringExtra("TITLE") ?: ""
             val notes    = data?.getStringExtra("NOTES") ?: ""
             val priority = data?.getIntExtra("PRIORITY", 0) ?: 0
+            val created = data?.getStringExtra("CREATED") ?: ""
             val due      = data?.getStringExtra("DATE")
             val remind   = data?.getBooleanExtra("REMIND", false) ?: false
             val progress = data?.getIntExtra("PROGRESS", 0) ?: 0
             val target   = data?.getIntExtra("TARGET", 1) ?: 1
 
             if (id != -1) {
-                viewModel.editTask(id, title, notes, priority, due, remind, progress, target)
+                viewModel.editTask(Task(id, title, notes, priority, created, due, remind, progress, target))
                 ReminderScheduler.cancel(this, id)
                 if (remind && !due.isNullOrBlank()) {
                     ReminderScheduler.schedule(this, id, title, due)
@@ -192,6 +193,7 @@ class MainActivity : AppCompatActivity() {
                                         putExtra("TASK_ID",  task.id)
                                         putExtra("TITLE",    task.title)
                                         putExtra("DATE",     task.due ?: "")
+                                        putExtra("CREATED",     task.created)
                                         putExtra("PRIORITY", priorityLabel)
                                         putExtra("NOTES",    task.notes)
                                         putExtra("REMIND",   task.remind)

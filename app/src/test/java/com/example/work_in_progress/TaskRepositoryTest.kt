@@ -1,6 +1,7 @@
 package com.example.work_in_progress
 
 import com.example.work_in_progress.database.*
+import com.example.work_in_progress.entities.Task
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest

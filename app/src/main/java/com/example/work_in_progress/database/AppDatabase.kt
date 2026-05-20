@@ -2,10 +2,11 @@
 package com.example.work_in_progress.database
 import android.content.Context
 import androidx.room.*
+import com.example.work_in_progress.entities.Task
 
 /**
  * Room database definition for the application.
- * Holds the [Task] entity and exposes access to [TaskDao].
+ * Holds the [com.example.work_in_progress.entities.Task] entity and exposes access to [TaskDao].
  */
 @Database(entities = [Task::class], version = 1)
 abstract class AppDatabase: RoomDatabase() {

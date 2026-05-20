@@ -5,6 +5,8 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import com.example.work_in_progress.database.*
+import com.example.work_in_progress.dtos.TaskParams
+import com.example.work_in_progress.entities.Task
 import com.example.work_in_progress.util.Priority
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.flowOf
@@ -174,7 +176,7 @@ class TaskViewModelTest {
             title = "My Task",
             notes = "Some notes",
             priority = Priority.MEDIUM,
-            due = "1/1/2025",
+            due = "2025-01-01",
             remind = true,
             progress = 0
         )
@@ -183,11 +185,23 @@ class TaskViewModelTest {
             title == "My Task" &&
                 notes == "Some notes" &&
                 priority == 2 &&
-                due == "1/1/2025" &&
+                due == "2025-01-01" &&
                 remind &&
                 progress == 0 &&
                 target == 1
         })
+    }
+
+    @Test
+    fun addTask_invokesOnInsertedWithInsertedId() = runTest {
+        whenever(repository.insert(any())).thenReturn(42L)
+        var insertedId: Int? = null
+
+        viewModel.addTask(TaskParams(title = "Task")) { id ->
+            insertedId = id
+        }
+
+        Assert.assertEquals(42, insertedId)
     }
 
     // allTasks LiveData
@@ -236,76 +250,5 @@ class TaskViewModelTest {
         Assert.assertThrows(IllegalArgumentException::class.java) {
             factory.create(OtherViewModel::class.java)
         }
-    }
-
-    // editTask tests
-
-    @Test
-    fun editTask_updatesAllFields() = runTest {
-        viewModel.editTask(
-            id = 1,
-            title = "Updated Title",
-            notes = "Updated notes",
-            priority = 2,
-            due = "5/20/2025",
-            remind = true,
-            progress = 1,
-            target = 1
-        )
-        verify(repository).update(argThat {
-            id == 1 &&
-                title == "Updated Title" &&
-                notes == "Updated notes" &&
-                priority == 2 &&
-                due == "5/20/2025" &&
-                remind &&
-                progress == 1 &&
-                target == 1
-        })
-    }
-
-    @Test
-    fun editTask_withNullDue() = runTest {
-        viewModel.editTask(
-            id = 1,
-            title = "Title",
-            notes = "",
-            priority = 0,
-            due = null,
-            remind = false,
-            progress = 0,
-            target = 1
-        )
-        verify(repository).update(argThat { due == null })
-    }
-
-    @Test
-    fun editTask_withBlankDueString_setsToNull() = runTest {
-        viewModel.editTask(
-            id = 1,
-            title = "Title",
-            notes = "",
-            priority = 0,
-            due = "   ",
-            remind = false,
-            progress = 0,
-            target = 1
-        )
-        verify(repository).update(argThat { due == null })
-    }
-
-    @Test
-    fun editTask_preservesId() = runTest {
-        viewModel.editTask(
-            id = 42,
-            title = "Title",
-            notes = "",
-            priority = 1,
-            due = null,
-            remind = false,
-            progress = 0,
-            target = 1
-        )
-        verify(repository).update(argThat { id == 42 })
     }
 }

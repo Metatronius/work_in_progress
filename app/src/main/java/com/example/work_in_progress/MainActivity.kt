@@ -1,3 +1,4 @@
+/** Main entry-point Activity that lists tasks, supports search filtering, and launches [AddTask]. */
 package com.example.work_in_progress
 
 import android.app.Activity
@@ -22,6 +23,10 @@ data class Task(
     var isCompleted: Boolean = false
 ) : Parcelable
 
+/**
+ * Main screen that displays all tasks in a scrollable list, provides a search bar for
+ * filtering by title, and navigates to [AddTask] to create new tasks.
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var taskContainer: LinearLayout
@@ -251,5 +256,183 @@ class MainActivity : AppCompatActivity() {
         } else {
             dueSoonPlaceholder.text = dueSoonTasks.joinToString("\n")
         }
+
+        val addTaskButton = findViewById<Button>(R.id.addTaskButton)
+        taskContainer = findViewById(R.id.taskContainer)
+        searchBar = findViewById(R.id.searchBar)
+
+        addTaskButton.setOnClickListener {
+            val intent = Intent(this, AddTask::class.java)
+            @Suppress("DEPRECATION")
+            startActivityForResult(intent, REQUEST_ADD_TASK)
+        }
+
+        searchBar.addTextChangedListener(object : TextWatcher {
+            /**
+             * Called to notify that the text has been changed.
+             *
+             * This method is invoked after the text in the input field has been modified.
+             * It triggers the display of tasks based on the updated text.
+             *
+             * @param s The new text as an Editable, or null if no text is present.
+             */
+            override fun afterTextChanged(s: Editable?) { displayTasks(s.toString()) }
+            /**
+             * Called to notify that the text has been changed.
+             *
+             * @param s The new text as a CharSequence.
+             * @param start The offset into the text where the change begins.
+             * @param count The number of characters that were added.
+             */
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            /**
+             * TODO: BUG - Line 83-95: This docstring is about onActivityResult, not onTextChanged (copy-paste error).
+             *
+             * @throws IllegalStateException if the requestCode is invalid.
+             *
+             * @deprecated Use ActivityResultLauncher instead.
+             */
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+    }
+
+    /**
+     * Receives the result from [AddTask] and persists the new task via the ViewModel.
+     *
+     * @param requestCode The request code passed to startActivityForResult.
+     * @param resultCode  The result code returned by the child activity.
+     * @param data        The Intent carrying the task field extras, or null.
+     */
+    @Deprecated("Use ActivityResultLauncher instead.")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        @Suppress("DEPRECATION")
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_ADD_TASK && resultCode == Activity.RESULT_OK) {
+            val priorityValue = DataUtil.getPriority(data?.getStringExtra("PRIORITY") ?: "None")
+            val params = TaskParams(
+                title    = data?.getStringExtra("TITLE") ?: "",
+                notes    = data?.getStringExtra("NOTES") ?: "",
+                priority = priorityValue,
+                due      = data?.getStringExtra("DATE")?.takeIf { it.isNotBlank() },
+                remind   = data?.getBooleanExtra("REMINDER", false) ?: false
+            )
+            viewModel.addTask(params) { taskId ->
+                if (params.remind && !params.due.isNullOrBlank()) {
+                    ReminderScheduler.schedule(this, taskId, params.title, params.due)
+                }
+            }
+        }
+
+        if (requestCode == REQUEST_EDIT_TASK && resultCode == Activity.RESULT_OK) {
+            val id       = data?.getIntExtra("TASK_ID", -1) ?: -1
+            val title    = data?.getStringExtra("TITLE") ?: ""
+            val notes    = data?.getStringExtra("NOTES") ?: ""
+            val priority = data?.getIntExtra("PRIORITY", 0) ?: 0
+            val due      = data?.getStringExtra("DATE")
+            val remind   = data?.getBooleanExtra("REMIND", false) ?: false
+            val progress = data?.getIntExtra("PROGRESS", 0) ?: 0
+            val target   = data?.getIntExtra("TARGET", 1) ?: 1
+
+            if (id != -1) {
+                viewModel.editTask(id, title, notes, priority, due, remind, progress, target)
+                ReminderScheduler.cancel(this, id)
+                if (remind && !due.isNullOrBlank()) {
+                    ReminderScheduler.schedule(this, id, title, due)
+                }
+            }
+        }
+    }
+
+    /**
+     * Clears [taskContainer] and re-renders only those tasks whose title contains [query]
+     * (case-insensitive). Each row includes a completion checkbox and a tappable title.
+     *
+     * @param query The search string to filter tasks by title.
+     */
+    private fun displayTasks(query: String) {
+        taskContainer.removeAllViews()
+
+        for (task in currentTasks) {
+            if (!task.title.contains(query, ignoreCase = true)) continue
+
+            val rowLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(8, 8, 8, 8)
+            }
+
+            val checkBox = CheckBox(this).apply {
+                isChecked = task.progress > 0
+                setOnCheckedChangeListener { _, _ -> viewModel.completeTask(task) }
+            }
+
+            val titleView = TextView(this).apply {
+                text = task.title
+                textSize = 18f
+                setPadding(8, 0, 0, 0)
+                setOnClickListener {
+                    val priorityLabel = DataUtil.getPriorityName(task.priority)
+                    val intent = Intent(this@MainActivity, TaskDetail::class.java).apply {
+                        putExtra("TITLE",    task.title)
+                        putExtra("DATE",     task.due ?: "")
+                        putExtra("PRIORITY", priorityLabel)
+                        putExtra("NOTES",    task.notes)
+                    }
+                    startActivity(intent)
+                }
+                setOnLongClickListener {
+                    val options = arrayOf("Edit", "Delete")
+                    android.app.AlertDialog.Builder(this@MainActivity)
+                        .setTitle(task.title)
+                        .setItems(options) { _, which ->
+                            when (which) {
+                                0 -> {
+                                    val priorityLabel = DataUtil.getPriorityName(task.priority)
+                                    val intent = Intent(this@MainActivity, EditTask::class.java).apply {
+                                        putExtra("TASK_ID",  task.id)
+                                        putExtra("TITLE",    task.title)
+                                        putExtra("DATE",     task.due ?: "")
+                                        putExtra("PRIORITY", priorityLabel)
+                                        putExtra("NOTES",    task.notes)
+                                        putExtra("REMIND",   task.remind)
+                                        putExtra("PROGRESS", task.progress)
+                                        putExtra("TARGET",   task.target)
+                                    }
+                                    @Suppress("DEPRECATION")
+                                    startActivityForResult(intent, REQUEST_EDIT_TASK)
+                                }
+                                1 -> {
+                                    android.app.AlertDialog.Builder(this@MainActivity)
+                                        .setTitle("Delete Task")
+                                        .setMessage("Are you sure you want to delete \"${task.title}\"?")
+                                        .setPositiveButton("Delete") { _, _ ->
+                                            ReminderScheduler.cancel(this@MainActivity, task.id)
+                                            viewModel.deleteTask(task)
+                                        }
+                                        .setNegativeButton("Cancel", null)
+                                        .show()
+                                }
+                            }
+                        }
+                        .show()
+                    true
+                }
+            }
+
+            rowLayout.addView(checkBox)
+            rowLayout.addView(titleView)
+            taskContainer.addView(rowLayout)
+        }
+    }
+
+    /**
+     * Updates [currentTasks] with the latest emission from the database and refreshes the
+     * displayed list using the current search query.
+     *
+     * @param tasks The full, up-to-date list of tasks from the database.
+     */
+    private fun renderTasks(tasks: List<Task>) {
+        currentTasks = tasks
+        displayTasks(searchBar.text.toString())
     }
 }

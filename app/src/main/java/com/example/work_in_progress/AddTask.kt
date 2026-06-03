@@ -1,3 +1,4 @@
+/** Activity that presents a form for the user to enter a new task and return it to [MainActivity]. */
 package com.example.work_in_progress
 
 import android.app.Activity
@@ -8,6 +9,10 @@ import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * Screen that collects task details (title, date, priority, notes, reminder) from the user
+ * and returns them to the caller via [android.app.Activity.setResult].
+ */
 class AddTask : AppCompatActivity() {
 
     private var position: Int = -1
@@ -15,6 +20,13 @@ class AddTask : AppCompatActivity() {
     private val dateFormat =
         SimpleDateFormat("MM/dd/yyyy", Locale.US)
 
+     /**
+     * Initializes the Add Task screen, wires up UI components, and returns the
+     * collected task data to the caller via an [android.content.Intent] result
+     * when the user taps Save.
+     *
+     * @param savedInstanceState Previously saved instance state, or null.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)

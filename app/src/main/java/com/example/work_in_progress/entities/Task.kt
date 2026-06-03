@@ -13,7 +13,7 @@ import java.util.Date
  * @property id       Auto-generated primary key.
  * @property title    Short title / name of the task.
  * @property notes    Optional longer description or notes for the task.
- * @property priority Numeric priority level: 0 = Low, 1 = Medium, 2 = High.
+ * @property priority Numeric priority level: 0 = None, 1 = Low, 2 = Medium, 3 = High.
  * @property created  String timestamp recording when the task was created.
  * @property due      Optional due-date string; null if no due date is set.
  * @property remind   Whether the user wants a reminder for this task.

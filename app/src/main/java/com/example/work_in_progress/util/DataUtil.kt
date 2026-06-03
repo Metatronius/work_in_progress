@@ -18,13 +18,21 @@ object DataUtil {
         return getPriority(priority).ordinal
     }
 
-    fun validateDate(date: String?) {
-        if (date.isNullOrEmpty()) return;
-        // TODO: BUG - Line 21: date.split("/").map { it.toInt() } can throw NumberFormatException. Add try-catch for better error handling.
+    fun validateDate(date: String) {
         val dateInt = date.split("/").map { it.toInt() }
-        if (!dateFormat.matches(date)) { throw IllegalArgumentException("Date must match format: mm/dd/yyyy") }
+        require(dateFormat.matches(date)) { "Title must match format: mm/dd/yyyy" }
 
-        if(dateInt[0] !in 1..12) { throw IllegalArgumentException("Month must be between 1 and 12") }
-        if (dateInt[1] !in 1..31) { throw IllegalArgumentException("Day must be between 1 and 31") }
+        require(dateInt[0] in 1..12) { "Month must be between 1 and 12" }
+        require(dateInt[1] in 1..31) { "Day must be between 1 and 31" }
+    }
+
+    fun validateTitle(title: String) {
+        require(title.isNotBlank() && title.length in 0..30) { "Title must not be blank or exceed 30 characters." }
+    }
+
+    fun validateTask(task: TaskParams) {
+        if (task.due != null)
+            validateDate(task.due)
+        validateTitle(task.title)
     }
 }

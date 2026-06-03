@@ -4,6 +4,7 @@ package com.example.work_in_progress
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -24,6 +25,7 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
     private val viewModel by lazy { getTaskViewModel() }
     private lateinit var taskContainer: LinearLayout
+    private val viewModel by lazy { getTaskViewModel() }
     private lateinit var searchBar: EditText
     private lateinit var dueSoonPlaceholder: TextView
 
@@ -37,9 +39,26 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_EDIT_TASK = 2
     }
 
+    /**
+     * Inflates the layout, binds UI views, observes the task list, and wires up
+     * the add-task button and search bar listeners.
+     *
+     * @param savedInstanceState Previously saved instance state, or null.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 100)
+            }
+        }
+
+        viewModel.allTasks.observe(this) { tasks ->
+            renderTasks(tasks)
+        }
 
         val addTaskButton = findViewById<Button>(R.id.addTaskButton)
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
@@ -256,6 +275,10 @@ class MainActivity : AppCompatActivity() {
                     ReminderScheduler.schedule(this, id, title, due)
                 }
             }
+
+            rowLayout.addView(checkBox)
+            rowLayout.addView(titleView)
+            taskContainer.addView(rowLayout)
         }
     }
 

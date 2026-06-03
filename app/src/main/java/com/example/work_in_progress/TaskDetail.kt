@@ -1,3 +1,4 @@
+/** Activity that displays the full details of a single task in a read-only view. */
 package com.example.work_in_progress
 
 import android.app.Activity
@@ -10,6 +11,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.work_in_progress.entities.Task
 
+/** Read-only detail screen that shows the title, due date, priority, and notes of a task. */
 class TaskDetail : AppCompatActivity() {
 
     private var position: Int = -1
@@ -97,6 +99,13 @@ class TaskDetail : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
+    /**
+     * Handles action bar item selections. Pressing the Up/Home button finishes
+     * the activity and returns to the previous screen.
+     *
+     * @param item The menu item that was selected.
+     * @return `true` if the event was handled; delegates to super otherwise.
+     */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         return if (item.itemId == android.R.id.home) {

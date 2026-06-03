@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.example.work_in_progress.util.DataUtil
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -91,11 +92,12 @@ class AddTask : AppCompatActivity() {
             }
 
             // date validation
-            if (!isValidDate(date)) {
-
+            try {
+                DataUtil.validateDate(date)
+            } catch (e: IllegalArgumentException) {
                 Toast.makeText(
                     this,
-                    "Invalid date. Use MM/DD/YYYY",
+                    e.message,
                     Toast.LENGTH_LONG
                 ).show()
 

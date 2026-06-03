@@ -10,6 +10,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.example.work_in_progress.entities.Task
 
 /**
  * Instrumented tests for [TaskDao] directly on database layer.

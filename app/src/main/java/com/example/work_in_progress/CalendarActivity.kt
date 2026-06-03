@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.example.work_in_progress.entities.Task
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.core.graphics.toColorInt
 
 class CalendarActivity : AppCompatActivity() {
 
@@ -37,6 +39,7 @@ class CalendarActivity : AppCompatActivity() {
         val bottomNav =
             findViewById<BottomNavigationView>(R.id.bottomNavigation)
 
+        @Suppress("DEPRECATION")
         taskList =
             intent.getParcelableArrayListExtra("TASK_LIST")
                 ?: arrayListOf()
@@ -68,23 +71,23 @@ class CalendarActivity : AppCompatActivity() {
 
             val tasksForDay = taskList.filter {
 
-                normalizeDate(it.date) == selectedDate
+                normalizeDate(it.due!!) == selectedDate
             }
 
             if (tasksForDay.isNotEmpty()) {
 
                 val taskText =
                     tasksForDay.joinToString("\n") {
-                        "• ${it.title}"
+                        getString(R.string.task_bullet, it.title)
                     }
 
                 selectedDateTasks.text =
-                    "Tasks for $selectedDate\n$taskText"
+                    getString(R.string.tasks_for_date, selectedDate, taskText)
 
             } else {
 
                 selectedDateTasks.text =
-                    "Tasks for $selectedDate\n(No tasks)"
+                    getString(R.string.no_tasks_for_date, selectedDate)
             }
 
             if (isWeekly) {
@@ -100,7 +103,7 @@ class CalendarActivity : AppCompatActivity() {
 
                 calendarView.visibility = View.GONE
                 weekContainer.visibility = View.VISIBLE
-                toggleButton.text = "Switch to Monthly"
+                toggleButton.setText(R.string.switch_to_monthly)
 
                 showWeeklyTasks(weekContainer)
 
@@ -108,7 +111,7 @@ class CalendarActivity : AppCompatActivity() {
 
                 calendarView.visibility = View.VISIBLE
                 weekContainer.visibility = View.GONE
-                toggleButton.text = "Switch to Weekly"
+                toggleButton.setText(R.string.switch_to_weekly)
             }
         }
     }
@@ -144,8 +147,7 @@ class CalendarActivity : AppCompatActivity() {
 
             val tasksForDay =
                 taskList.filter {
-
-                    normalizeDate(it.date) == dateString
+                    it.due != null && normalizeDate(it.due) == dateString
                 }
 
             val dayLayout = LinearLayout(this)
@@ -157,16 +159,16 @@ class CalendarActivity : AppCompatActivity() {
             if (tasksForDay.isNotEmpty()) {
 
                 dayTitle.text =
-                    "🔵 ${daysOfWeek[i]} ($dateString)"
+                    getString(R.string.day_title_with_tasks, daysOfWeek[i], dateString)
 
                 dayTitle.setTextColor(
-                    Color.parseColor("#2196F3")
+                    "#2196F3".toColorInt()
                 )
 
             } else {
 
                 dayTitle.text =
-                    "${daysOfWeek[i]} ($dateString)"
+                    getString(R.string.day_title_no_tasks, daysOfWeek[i], dateString)
             }
 
             dayTitle.textSize = 16f
@@ -176,7 +178,7 @@ class CalendarActivity : AppCompatActivity() {
             if (tasksForDay.isEmpty()) {
 
                 val emptyText = TextView(this)
-                emptyText.text = "No tasks"
+                emptyText.setText(R.string.no_tasks)
 
                 dayLayout.addView(emptyText)
 
@@ -187,7 +189,7 @@ class CalendarActivity : AppCompatActivity() {
                     val taskText = TextView(this)
 
                     taskText.text =
-                        "• ${task.title}"
+                        getString(R.string.task_bullet, task.title)
 
                     taskText.textSize = 14f
                     taskText.setPadding(8, 2, 0, 2)

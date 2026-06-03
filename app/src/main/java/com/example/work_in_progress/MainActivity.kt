@@ -1,6 +1,7 @@
 /** Main entry-point Activity that lists tasks, supports search filtering, and launches [AddTask]. */
 package com.example.work_in_progress
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -9,32 +10,32 @@ import android.text.TextWatcher
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import kotlinx.parcelize.Parcelize
-import android.os.Parcelable
+import com.example.work_in_progress.dtos.TaskParams
+import com.example.work_in_progress.entities.Task
+import com.example.work_in_progress.extensions.getTaskViewModel
+import com.example.work_in_progress.util.DataUtil
 import java.text.SimpleDateFormat
 import java.util.*
-
-@Parcelize
-data class Task(
-    var title: String,
-    var date: String,
-    var priority: String,
-    var notes: String,
-    var isCompleted: Boolean = false
-) : Parcelable
 
 /**
  * Main screen that displays all tasks in a scrollable list, provides a search bar for
  * filtering by title, and navigates to [AddTask] to create new tasks.
  */
 class MainActivity : AppCompatActivity() {
-
+    private val viewModel by lazy { getTaskViewModel() }
     private lateinit var taskContainer: LinearLayout
     private lateinit var searchBar: EditText
     private lateinit var dueSoonPlaceholder: TextView
 
-    private val taskList = ArrayList<Task>()
-    private var currentDisplayList = ArrayList<Task>()
+    private var currentTasks: List<Task> = emptyList()
+    private var currentDisplayList: List<Task> = emptyList()
+
+    companion object {
+        /** Request code used when launching [AddTask] for a result. */
+        private const val REQUEST_ADD_TASK = 1
+        /** Request code used when launching [EditTask] for a result. */
+        private const val REQUEST_EDIT_TASK = 2
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,10 +48,16 @@ class MainActivity : AppCompatActivity() {
         searchBar = findViewById(R.id.searchBar)
         dueSoonPlaceholder = findViewById(R.id.dueSoonPlaceholder)
 
-        currentDisplayList = taskList
+        refreshTasks()
+
+        viewModel.allTasks.observe(this) { tasks ->
+            renderTasks(tasks)
+        }
 
         addTaskButton.setOnClickListener {
-            startActivityForResult(Intent(this, AddTask::class.java), 1)
+            val intent = Intent(this, AddTask::class.java)
+            @Suppress("DEPRECATION")
+            startActivityForResult(intent, REQUEST_ADD_TASK)
         }
 
         searchBar.addTextChangedListener(object : TextWatcher {
@@ -69,7 +76,7 @@ class MainActivity : AppCompatActivity() {
                 before: Int,
                 count: Int
             ) {
-                filterTasks(s.toString())
+                filterTasks()
             }
         })
 
@@ -79,7 +86,7 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.nav_calendar -> {
                     val intent = Intent(this, CalendarActivity::class.java)
-                    intent.putParcelableArrayListExtra("TASK_LIST", taskList)
+                    intent.putParcelableArrayListExtra("TASK_LIST", ArrayList(currentTasks.filter { it.due != null }))
                     startActivity(intent)
                     true
                 }
@@ -91,82 +98,14 @@ class MainActivity : AppCompatActivity() {
         refreshTasks()
     }
 
-    override fun onActivityResult(
-        requestCode: Int,
-        resultCode: Int,
-        data: Intent?
-    ) {
-
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (data == null) return
-
-        // delete task
-        if (resultCode == 3) {
-
-            val pos = data.getIntExtra("POSITION", -1)
-
-            if (pos != -1 && pos < taskList.size) {
-
-                taskList.removeAt(pos)
-
-                refreshTasks()
-            }
-
-            return
-        }
-
-        if (resultCode != Activity.RESULT_OK) return
-
-        when (requestCode) {
-
-            // add task
-            1 -> {
-
-                val task = Task(
-                    data.getStringExtra("TITLE") ?: "",
-                    data.getStringExtra("DATE") ?: "",
-                    data.getStringExtra("PRIORITY") ?: "",
-                    data.getStringExtra("NOTES") ?: "",
-                    false
-                )
-
-                taskList.add(task)
-
-                refreshTasks()
-            }
-
-            // edit task
-            2 -> {
-
-                val pos = data.getIntExtra("POSITION", -1)
-
-                if (pos != -1 && pos < taskList.size) {
-
-                    val completedState = taskList[pos].isCompleted
-
-                    taskList[pos] = Task(
-                        data.getStringExtra("TITLE") ?: "",
-                        data.getStringExtra("DATE") ?: "",
-                        data.getStringExtra("PRIORITY") ?: "",
-                        data.getStringExtra("NOTES") ?: "",
-                        completedState
-                    )
-
-                    refreshTasks()
-                }
-            }
-        }
-    }
-
     private fun refreshTasks() {
 
         val query = searchBar.text.toString()
 
         currentDisplayList = if (query.isEmpty()) {
-            taskList
+            currentTasks
         } else {
-            ArrayList(taskList.filter {
+            ArrayList(currentTasks.filter {
                 it.title.lowercase().contains(query.lowercase())
             })
         }
@@ -177,16 +116,16 @@ class MainActivity : AppCompatActivity() {
 
         for (task in currentDisplayList) {
 
-            val realIndex = taskList.indexOf(task)
+            val realIndex = currentTasks.indexOf(task)
 
             val rowLayout = LinearLayout(this)
             rowLayout.orientation = LinearLayout.HORIZONTAL
 
             val checkBox = CheckBox(this)
-            checkBox.isChecked = task.isCompleted
+            checkBox.isChecked = task.progress >= task.target
 
             checkBox.setOnCheckedChangeListener { _, isChecked ->
-                task.isCompleted = isChecked
+                task.progress = if (isChecked) 1 else 0
             }
 
             val titleView = TextView(this)
@@ -199,12 +138,13 @@ class MainActivity : AppCompatActivity() {
                 val intent = Intent(this, TaskDetail::class.java)
 
                 intent.putExtra("TITLE", task.title)
-                intent.putExtra("DATE", task.date)
+                intent.putExtra("DATE", task.due)
                 intent.putExtra("PRIORITY", task.priority)
                 intent.putExtra("NOTES", task.notes)
                 intent.putExtra("POSITION", realIndex)
-                intent.putExtra("TASK_LIST", taskList)
+                intent.putExtra("TASK_LIST", ArrayList(currentTasks))
 
+                @Suppress("DEPRECATION")
                 startActivityForResult(intent, 2)
             }
 
@@ -215,10 +155,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun filterTasks(query: String) {
+    private fun filterTasks() {
         refreshTasks()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateDueSoon() {
 
         val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.US)
@@ -226,10 +167,11 @@ class MainActivity : AppCompatActivity() {
 
         val dueSoonTasks = ArrayList<String>()
 
-        for (task in taskList) {
+        for (task in currentTasks) {
 
             try {
-                val taskDate = formatter.parse(task.date)
+                val due = task.due ?: continue
+                val taskDate = formatter.parse(due)
 
                 if (taskDate != null) {
 
@@ -248,6 +190,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
+
             }
         }
 
@@ -266,34 +209,6 @@ class MainActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             startActivityForResult(intent, REQUEST_ADD_TASK)
         }
-
-        searchBar.addTextChangedListener(object : TextWatcher {
-            /**
-             * Called to notify that the text has been changed.
-             *
-             * This method is invoked after the text in the input field has been modified.
-             * It triggers the display of tasks based on the updated text.
-             *
-             * @param s The new text as an Editable, or null if no text is present.
-             */
-            override fun afterTextChanged(s: Editable?) { displayTasks(s.toString()) }
-            /**
-             * Called to notify that the text has been changed.
-             *
-             * @param s The new text as a CharSequence.
-             * @param start The offset into the text where the change begins.
-             * @param count The number of characters that were added.
-             */
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            /**
-             * TODO: BUG - Line 83-95: This docstring is about onActivityResult, not onTextChanged (copy-paste error).
-             *
-             * @throws IllegalStateException if the requestCode is invalid.
-             *
-             * @deprecated Use ActivityResultLauncher instead.
-             */
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
     }
 
     /**
@@ -311,11 +226,11 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == REQUEST_ADD_TASK && resultCode == Activity.RESULT_OK) {
             val priorityValue = DataUtil.getPriority(data?.getStringExtra("PRIORITY") ?: "None")
             val params = TaskParams(
-                title    = data?.getStringExtra("TITLE") ?: "",
-                notes    = data?.getStringExtra("NOTES") ?: "",
+                title = data?.getStringExtra("TITLE") ?: "",
+                notes = data?.getStringExtra("NOTES") ?: "",
                 priority = priorityValue,
-                due      = data?.getStringExtra("DATE")?.takeIf { it.isNotBlank() },
-                remind   = data?.getBooleanExtra("REMINDER", false) ?: false
+                due = data?.getStringExtra("DATE")?.takeIf { it.isNotBlank() },
+                remind = data?.getBooleanExtra("REMINDER", false) ?: false
             )
             viewModel.addTask(params) { taskId ->
                 if (params.remind && !params.due.isNullOrBlank()) {
@@ -325,14 +240,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (requestCode == REQUEST_EDIT_TASK && resultCode == Activity.RESULT_OK) {
-            val id       = data?.getIntExtra("TASK_ID", -1) ?: -1
-            val title    = data?.getStringExtra("TITLE") ?: ""
-            val notes    = data?.getStringExtra("NOTES") ?: ""
+            val id = data?.getIntExtra("TASK_ID", -1) ?: -1
+            val title = data?.getStringExtra("TITLE") ?: ""
+            val notes = data?.getStringExtra("NOTES") ?: ""
             val priority = data?.getIntExtra("PRIORITY", 0) ?: 0
-            val due      = data?.getStringExtra("DATE")
-            val remind   = data?.getBooleanExtra("REMIND", false) ?: false
+            val due = data?.getStringExtra("DATE")
+            val remind = data?.getBooleanExtra("REMIND", false) ?: false
             val progress = data?.getIntExtra("PROGRESS", 0) ?: 0
-            val target   = data?.getIntExtra("TARGET", 1) ?: 1
+            val target = data?.getIntExtra("TARGET", 1) ?: 1
 
             if (id != -1) {
                 viewModel.editTask(id, title, notes, priority, due, remind, progress, target)

@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.work_in_progress.entities.Task
 
 class TaskDetail : AppCompatActivity() {
 
@@ -26,9 +27,10 @@ class TaskDetail : AppCompatActivity() {
 
         position = intent.getIntExtra("POSITION", -1)
 
+        @Suppress("DEPRECATION")
         val taskList = intent.getParcelableArrayListExtra<Task>("TASK_LIST") ?: arrayListOf()
 
-        val completedTasks = taskList.count { it.isCompleted }
+        val completedTasks = taskList.count { it.progress >= it.target }
         val pendingTasks = taskList.size - completedTasks
 
         val titleView = findViewById<TextView>(R.id.detailTitle)

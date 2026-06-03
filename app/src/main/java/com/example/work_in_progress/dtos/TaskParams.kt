@@ -1,6 +1,8 @@
 package com.example.work_in_progress.dtos
 
+import android.os.Parcelable
 import com.example.work_in_progress.util.Priority
+import kotlinx.parcelize.Parcelize
 
 /**
  * Immutable parameter object used to create a new [Task] without exposing the
@@ -14,10 +16,11 @@ import com.example.work_in_progress.util.Priority
  * @property progress Initial progress value (default 0 = not started).
  */
 data class TaskParams(
-    val title: String,
-    val notes: String = "",
-    val priority: Priority = Priority.NONE,
+    var title: String,
+    var notes: String = "",
+    var priority: Priority = Priority.NONE,
     val due: String? = null,
-    val remind: Boolean = false,
-    val progress: Int = 0
+    var remind: Boolean = false,
+    var progress: Int = 0,
+    val target: Int = 1
 )

@@ -69,7 +69,7 @@
                 android:padding="10dp"/>
         </LinearLayout>
 
-        <!-- priority radio buttons -->
+        <!-- priority radio buttons  -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

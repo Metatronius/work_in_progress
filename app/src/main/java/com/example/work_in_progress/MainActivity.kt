@@ -3,17 +3,25 @@ package com.example.work_in_progress
 
 import android.app.Activity
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.example.work_in_progress.entities.Task
-import com.example.work_in_progress.dtos.TaskParams
-import com.example.work_in_progress.extensions.getTaskViewModel
-import com.example.work_in_progress.util.DataUtil
-import java.security.InvalidParameterException
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.parcelize.Parcelize
+import android.os.Parcelable
+import java.text.SimpleDateFormat
+import java.util.*
+
+@Parcelize
+data class Task(
+    var title: String,
+    var date: String,
+    var priority: String,
+    var notes: String,
+    var isCompleted: Boolean = false
+) : Parcelable
 
 /**
  * Main screen that displays all tasks in a scrollable list, provides a search bar for
@@ -22,38 +30,231 @@ import java.security.InvalidParameterException
 class MainActivity : AppCompatActivity() {
 
     private lateinit var taskContainer: LinearLayout
-    private val viewModel by lazy { getTaskViewModel() }
     private lateinit var searchBar: EditText
+    private lateinit var dueSoonPlaceholder: TextView
 
-    /** In-memory cache of the latest task list from the database, used for search filtering. */
-    private var currentTasks: List<Task> = emptyList()
+    private val taskList = ArrayList<Task>()
+    private var currentDisplayList = ArrayList<Task>()
 
-    companion object {
-        /** Request code used when launching [AddTask] for a result. */
-        private const val REQUEST_ADD_TASK = 1
-        /** Request code used when launching [EditTask] for a result. */
-        private const val REQUEST_EDIT_TASK = 2
-    }
-
-    /**
-     * Inflates the layout, binds UI views, observes the task list, and wires up
-     * the add-task button and search bar listeners.
-     *
-     * @param savedInstanceState Previously saved instance state, or null.
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
-                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 100)
+        val addTaskButton = findViewById<Button>(R.id.addTaskButton)
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+
+        taskContainer = findViewById(R.id.taskContainer)
+        searchBar = findViewById(R.id.searchBar)
+        dueSoonPlaceholder = findViewById(R.id.dueSoonPlaceholder)
+
+        currentDisplayList = taskList
+
+        addTaskButton.setOnClickListener {
+            startActivityForResult(Intent(this, AddTask::class.java), 1)
+        }
+
+        searchBar.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {}
+
+            override fun onTextChanged(
+                s: CharSequence?,
+                start: Int,
+                before: Int,
+                count: Int
+            ) {
+                filterTasks(s.toString())
+            }
+        })
+
+        bottomNav.setOnItemSelectedListener {
+            when (it.itemId) {
+                R.id.nav_home -> true
+
+                R.id.nav_calendar -> {
+                    val intent = Intent(this, CalendarActivity::class.java)
+                    intent.putParcelableArrayListExtra("TASK_LIST", taskList)
+                    startActivity(intent)
+                    true
+                }
+
+                else -> false
             }
         }
 
-        viewModel.allTasks.observe(this) { tasks ->
-            renderTasks(tasks)
+        refreshTasks()
+    }
+
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (data == null) return
+
+        // delete task
+        if (resultCode == 3) {
+
+            val pos = data.getIntExtra("POSITION", -1)
+
+            if (pos != -1 && pos < taskList.size) {
+
+                taskList.removeAt(pos)
+
+                refreshTasks()
+            }
+
+            return
+        }
+
+        if (resultCode != Activity.RESULT_OK) return
+
+        when (requestCode) {
+
+            // add task
+            1 -> {
+
+                val task = Task(
+                    data.getStringExtra("TITLE") ?: "",
+                    data.getStringExtra("DATE") ?: "",
+                    data.getStringExtra("PRIORITY") ?: "",
+                    data.getStringExtra("NOTES") ?: "",
+                    false
+                )
+
+                taskList.add(task)
+
+                refreshTasks()
+            }
+
+            // edit task
+            2 -> {
+
+                val pos = data.getIntExtra("POSITION", -1)
+
+                if (pos != -1 && pos < taskList.size) {
+
+                    val completedState = taskList[pos].isCompleted
+
+                    taskList[pos] = Task(
+                        data.getStringExtra("TITLE") ?: "",
+                        data.getStringExtra("DATE") ?: "",
+                        data.getStringExtra("PRIORITY") ?: "",
+                        data.getStringExtra("NOTES") ?: "",
+                        completedState
+                    )
+
+                    refreshTasks()
+                }
+            }
+        }
+    }
+
+    private fun refreshTasks() {
+
+        val query = searchBar.text.toString()
+
+        currentDisplayList = if (query.isEmpty()) {
+            taskList
+        } else {
+            ArrayList(taskList.filter {
+                it.title.lowercase().contains(query.lowercase())
+            })
+        }
+
+        updateDueSoon()
+
+        taskContainer.removeAllViews()
+
+        for (task in currentDisplayList) {
+
+            val realIndex = taskList.indexOf(task)
+
+            val rowLayout = LinearLayout(this)
+            rowLayout.orientation = LinearLayout.HORIZONTAL
+
+            val checkBox = CheckBox(this)
+            checkBox.isChecked = task.isCompleted
+
+            checkBox.setOnCheckedChangeListener { _, isChecked ->
+                task.isCompleted = isChecked
+            }
+
+            val titleView = TextView(this)
+            titleView.text = task.title
+            titleView.textSize = 18f
+            titleView.setPadding(8, 0, 0, 0)
+
+            titleView.setOnClickListener {
+
+                val intent = Intent(this, TaskDetail::class.java)
+
+                intent.putExtra("TITLE", task.title)
+                intent.putExtra("DATE", task.date)
+                intent.putExtra("PRIORITY", task.priority)
+                intent.putExtra("NOTES", task.notes)
+                intent.putExtra("POSITION", realIndex)
+                intent.putExtra("TASK_LIST", taskList)
+
+                startActivityForResult(intent, 2)
+            }
+
+            rowLayout.addView(checkBox)
+            rowLayout.addView(titleView)
+
+            taskContainer.addView(rowLayout)
+        }
+    }
+
+    private fun filterTasks(query: String) {
+        refreshTasks()
+    }
+
+    private fun updateDueSoon() {
+
+        val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.US)
+        val today = Calendar.getInstance().time
+
+        val dueSoonTasks = ArrayList<String>()
+
+        for (task in taskList) {
+
+            try {
+                val taskDate = formatter.parse(task.date)
+
+                if (taskDate != null) {
+
+                    val diff = taskDate.time - today.time
+                    val days = (diff / (1000 * 60 * 60 * 24)).toInt()
+
+                    if (days in 0..7) {
+
+                        val timeText = when (days) {
+                            0 -> "Today"
+                            1 -> "Tomorrow"
+                            else -> "$days days"
+                        }
+
+                        dueSoonTasks.add("• ${task.title} ($timeText)")
+                    }
+                }
+            } catch (e: Exception) {
+            }
+        }
+
+        if (dueSoonTasks.isEmpty()) {
+            dueSoonPlaceholder.text = "No tasks due soon"
+        } else {
+            dueSoonPlaceholder.text = dueSoonTasks.joinToString("\n")
         }
 
         val addTaskButton = findViewById<Button>(R.id.addTaskButton)

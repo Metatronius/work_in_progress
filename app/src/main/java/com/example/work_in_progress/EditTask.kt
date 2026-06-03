@@ -32,8 +32,6 @@ class EditTask : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_task)
 
-        val viewModel by lazy { getTaskViewModel() }
-
         val taskId = intent.getIntExtra("TASK_ID", -1)
         val taskTitle = intent.getStringExtra("TITLE") ?: ""
         val taskDate = intent.getStringExtra("DATE") ?: ""

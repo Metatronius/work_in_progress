@@ -92,16 +92,18 @@ class AddTask : AppCompatActivity() {
             }
 
             // date validation
-            try {
-                DataUtil.validateDate(date)
-            } catch (e: IllegalArgumentException) {
-                Toast.makeText(
-                    this,
-                    e.message,
-                    Toast.LENGTH_LONG
-                ).show()
+            if (!date.isBlank()) {
+                try {
+                    DataUtil.validateDate(date)
+                } catch (e: IllegalArgumentException) {
+                    Toast.makeText(
+                        this,
+                        e.message,
+                        Toast.LENGTH_LONG
+                    ).show()
 
-                return@setOnClickListener
+                    return@setOnClickListener
+                }
             }
 
             val selectedPriorityId =
@@ -130,22 +132,6 @@ class AddTask : AppCompatActivity() {
             setResult(Activity.RESULT_OK, resultIntent)
 
             finish()
-        }
-    }
-
-    private fun isValidDate(date: String): Boolean {
-
-        return try {
-
-            dateFormat.isLenient = false
-
-            val parsedDate = dateFormat.parse(date)
-
-            parsedDate != null
-
-        } catch (e: Exception) {
-
-            false
         }
     }
 }

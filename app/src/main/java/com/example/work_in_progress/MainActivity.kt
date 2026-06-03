@@ -23,7 +23,6 @@ import java.util.*
  * filtering by title, and navigates to [AddTask] to create new tasks.
  */
 class MainActivity : AppCompatActivity() {
-    private val viewModel by lazy { getTaskViewModel() }
     private lateinit var taskContainer: LinearLayout
     private val viewModel by lazy { getTaskViewModel() }
     private lateinit var searchBar: EditText
@@ -263,22 +262,19 @@ class MainActivity : AppCompatActivity() {
             val title = data?.getStringExtra("TITLE") ?: ""
             val notes = data?.getStringExtra("NOTES") ?: ""
             val priority = data?.getIntExtra("PRIORITY", 0) ?: 0
+            val created = data?.getStringExtra("CREATED") ?: ""
             val due = data?.getStringExtra("DATE")
             val remind = data?.getBooleanExtra("REMIND", false) ?: false
             val progress = data?.getIntExtra("PROGRESS", 0) ?: 0
             val target = data?.getIntExtra("TARGET", 1) ?: 1
 
             if (id != -1) {
-                viewModel.editTask(id, title, notes, priority, due, remind, progress, target)
+                viewModel.editTask(Task(id, title, notes, priority, created, due, remind, progress, target))
                 ReminderScheduler.cancel(this, id)
                 if (remind && !due.isNullOrBlank()) {
                     ReminderScheduler.schedule(this, id, title, due)
                 }
             }
-
-            rowLayout.addView(checkBox)
-            rowLayout.addView(titleView)
-            taskContainer.addView(rowLayout)
         }
     }
 

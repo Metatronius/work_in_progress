@@ -1,6 +1,7 @@
 /** Main entry-point Activity that lists tasks, supports search filtering, and launches [AddTask]. */
 package com.example.work_in_progress
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Build
@@ -9,24 +10,27 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.example.work_in_progress.entities.Task
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.example.work_in_progress.dtos.TaskParams
+import com.example.work_in_progress.entities.Task
 import com.example.work_in_progress.extensions.getTaskViewModel
 import com.example.work_in_progress.util.DataUtil
-import java.security.InvalidParameterException
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Main screen that displays all tasks in a scrollable list, provides a search bar for
  * filtering by title, and navigates to [AddTask] to create new tasks.
  */
 class MainActivity : AppCompatActivity() {
-
+    private val viewModel by lazy { getTaskViewModel() }
     private lateinit var taskContainer: LinearLayout
     private val viewModel by lazy { getTaskViewModel() }
     private lateinit var searchBar: EditText
+    private lateinit var dueSoonPlaceholder: TextView
 
-    /** In-memory cache of the latest task list from the database, used for search filtering. */
     private var currentTasks: List<Task> = emptyList()
+    private var currentDisplayList: List<Task> = emptyList()
 
     companion object {
         /** Request code used when launching [AddTask] for a result. */
@@ -57,8 +61,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         val addTaskButton = findViewById<Button>(R.id.addTaskButton)
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+
         taskContainer = findViewById(R.id.taskContainer)
         searchBar = findViewById(R.id.searchBar)
+        dueSoonPlaceholder = findViewById(R.id.dueSoonPlaceholder)
+
+        refreshTasks()
+
+        viewModel.allTasks.observe(this) { tasks ->
+            renderTasks(tasks)
+        }
 
         addTaskButton.setOnClickListener {
             val intent = Intent(this, AddTask::class.java)
@@ -67,33 +80,154 @@ class MainActivity : AppCompatActivity() {
         }
 
         searchBar.addTextChangedListener(object : TextWatcher {
-            /**
-             * Called to notify that the text has been changed.
-             *
-             * This method is invoked after the text in the input field has been modified.
-             * It triggers the display of tasks based on the updated text.
-             *
-             * @param s The new text as an Editable, or null if no text is present.
-             */
-            override fun afterTextChanged(s: Editable?) { displayTasks(s.toString()) }
-            /**
-             * Called to notify that the text has been changed.
-             *
-             * @param s The new text as a CharSequence.
-             * @param start The offset into the text where the change begins.
-             * @param count The number of characters that were added.
-             */
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            /**
-             * Called when an activity you launched exits, giving you the requestCode you started it with,
-             * the resultCode it returned, and any additional data from it.
-             *
-             * @throws IllegalStateException if the requestCode is invalid.
-             *
-             * @deprecated Use ActivityResultLauncher instead.
-             */
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {}
+
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {}
+
+            override fun onTextChanged(
+                s: CharSequence?,
+                start: Int,
+                before: Int,
+                count: Int
+            ) {
+                filterTasks()
+            }
         })
+
+        bottomNav.setOnItemSelectedListener {
+            when (it.itemId) {
+                R.id.nav_home -> true
+
+                R.id.nav_calendar -> {
+                    val intent = Intent(this, CalendarActivity::class.java)
+                    intent.putParcelableArrayListExtra("TASK_LIST", ArrayList(currentTasks.filter { it.due != null }))
+                    startActivity(intent)
+                    true
+                }
+
+                else -> false
+            }
+        }
+
+        refreshTasks()
+    }
+
+    private fun refreshTasks() {
+
+        val query = searchBar.text.toString()
+
+        currentDisplayList = if (query.isEmpty()) {
+            currentTasks
+        } else {
+            ArrayList(currentTasks.filter {
+                it.title.lowercase().contains(query.lowercase())
+            })
+        }
+
+        updateDueSoon()
+
+        taskContainer.removeAllViews()
+
+        for (task in currentDisplayList) {
+
+            val realIndex = currentTasks.indexOf(task)
+
+            val rowLayout = LinearLayout(this)
+            rowLayout.orientation = LinearLayout.HORIZONTAL
+
+            val checkBox = CheckBox(this)
+            checkBox.isChecked = task.progress >= task.target
+
+            checkBox.setOnCheckedChangeListener { _, isChecked ->
+                task.progress = if (isChecked) 1 else 0
+            }
+
+            val titleView = TextView(this)
+            titleView.text = task.title
+            titleView.textSize = 18f
+            titleView.setPadding(8, 0, 0, 0)
+
+            titleView.setOnClickListener {
+
+                val intent = Intent(this, TaskDetail::class.java)
+
+                intent.putExtra("TITLE", task.title)
+                intent.putExtra("DATE", task.due)
+                intent.putExtra("PRIORITY", task.priority)
+                intent.putExtra("NOTES", task.notes)
+                intent.putExtra("POSITION", realIndex)
+                intent.putExtra("TASK_LIST", ArrayList(currentTasks))
+
+                @Suppress("DEPRECATION")
+                startActivityForResult(intent, 2)
+            }
+
+            rowLayout.addView(checkBox)
+            rowLayout.addView(titleView)
+
+            taskContainer.addView(rowLayout)
+        }
+    }
+
+    private fun filterTasks() {
+        refreshTasks()
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun updateDueSoon() {
+
+        val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.US)
+        val today = Calendar.getInstance().time
+
+        val dueSoonTasks = ArrayList<String>()
+
+        for (task in currentTasks) {
+
+            try {
+                val due = task.due ?: continue
+                val taskDate = formatter.parse(due)
+
+                if (taskDate != null) {
+
+                    val diff = taskDate.time - today.time
+                    val days = (diff / (1000 * 60 * 60 * 24)).toInt()
+
+                    if (days in 0..7) {
+
+                        val timeText = when (days) {
+                            0 -> "Today"
+                            1 -> "Tomorrow"
+                            else -> "$days days"
+                        }
+
+                        dueSoonTasks.add("• ${task.title} ($timeText)")
+                    }
+                }
+            } catch (e: Exception) {
+
+            }
+        }
+
+        if (dueSoonTasks.isEmpty()) {
+            dueSoonPlaceholder.text = "No tasks due soon"
+        } else {
+            dueSoonPlaceholder.text = dueSoonTasks.joinToString("\n")
+        }
+
+        val addTaskButton = findViewById<Button>(R.id.addTaskButton)
+        taskContainer = findViewById(R.id.taskContainer)
+        searchBar = findViewById(R.id.searchBar)
+
+        addTaskButton.setOnClickListener {
+            val intent = Intent(this, AddTask::class.java)
+            @Suppress("DEPRECATION")
+            startActivityForResult(intent, REQUEST_ADD_TASK)
+        }
     }
 
     /**
@@ -111,11 +245,11 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == REQUEST_ADD_TASK && resultCode == Activity.RESULT_OK) {
             val priorityValue = DataUtil.getPriority(data?.getStringExtra("PRIORITY") ?: "None")
             val params = TaskParams(
-                title    = data?.getStringExtra("TITLE") ?: "",
-                notes    = data?.getStringExtra("NOTES") ?: "",
+                title = data?.getStringExtra("TITLE") ?: "",
+                notes = data?.getStringExtra("NOTES") ?: "",
                 priority = priorityValue,
-                due      = data?.getStringExtra("DATE")?.takeIf { it.isNotBlank() },
-                remind   = data?.getBooleanExtra("REMINDER", false) ?: false
+                due = data?.getStringExtra("DATE")?.takeIf { it.isNotBlank() },
+                remind = data?.getBooleanExtra("REMINDER", false) ?: false
             )
             viewModel.addTask(params) { taskId ->
                 if (params.remind && !params.due.isNullOrBlank()) {
@@ -125,23 +259,26 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (requestCode == REQUEST_EDIT_TASK && resultCode == Activity.RESULT_OK) {
-            val id       = data?.getIntExtra("TASK_ID", -1) ?: -1
-            val title    = data?.getStringExtra("TITLE") ?: ""
-            val notes    = data?.getStringExtra("NOTES") ?: ""
+            val id = data?.getIntExtra("TASK_ID", -1) ?: -1
+            val title = data?.getStringExtra("TITLE") ?: ""
+            val notes = data?.getStringExtra("NOTES") ?: ""
             val priority = data?.getIntExtra("PRIORITY", 0) ?: 0
-            val created = data?.getStringExtra("CREATED") ?: ""
-            val due      = data?.getStringExtra("DATE")
-            val remind   = data?.getBooleanExtra("REMIND", false) ?: false
+            val due = data?.getStringExtra("DATE")
+            val remind = data?.getBooleanExtra("REMIND", false) ?: false
             val progress = data?.getIntExtra("PROGRESS", 0) ?: 0
-            val target   = data?.getIntExtra("TARGET", 1) ?: 1
+            val target = data?.getIntExtra("TARGET", 1) ?: 1
 
             if (id != -1) {
-                viewModel.editTask(Task(id, title, notes, priority, created, due, remind, progress, target))
+                viewModel.editTask(id, title, notes, priority, due, remind, progress, target)
                 ReminderScheduler.cancel(this, id)
                 if (remind && !due.isNullOrBlank()) {
                     ReminderScheduler.schedule(this, id, title, due)
                 }
             }
+
+            rowLayout.addView(checkBox)
+            rowLayout.addView(titleView)
+            taskContainer.addView(rowLayout)
         }
     }
 
@@ -193,7 +330,6 @@ class MainActivity : AppCompatActivity() {
                                         putExtra("TASK_ID",  task.id)
                                         putExtra("TITLE",    task.title)
                                         putExtra("DATE",     task.due ?: "")
-                                        putExtra("CREATED",     task.created)
                                         putExtra("PRIORITY", priorityLabel)
                                         putExtra("NOTES",    task.notes)
                                         putExtra("REMIND",   task.remind)

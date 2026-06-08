@@ -8,8 +8,7 @@ import com.example.work_in_progress.entities.Task
  * Room database definition for the application.
  * Holds the [com.example.work_in_progress.entities.Task] entity and exposes access to [TaskDao].
  */
-@Database(entities = [Task::class], version = 2)
-@TypeConverters(Converters::class)
+@Database(entities = [Task::class], version = 1)
 abstract class AppDatabase: RoomDatabase() {
     /** Returns the DAO for task-related database operations. */
     abstract fun taskDao(): TaskDao

@@ -226,7 +226,7 @@ class MainActivity : AppCompatActivity() {
                                     val intent = Intent(this@MainActivity, EditTask::class.java).apply {
                                         putExtra("TASK_ID",  task.id)
                                         putExtra("TITLE",    task.title)
-                                        putExtra("DATE",     task.due ?: "")
+                                        putExtra("DATE",     task.due)
                                         putExtra("PRIORITY", priorityLabel)
                                         putExtra("NOTES",    task.notes)
                                         putExtra("CREATED",  task.created)

@@ -32,9 +32,7 @@ abstract class AppDatabase: RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "task_database"
-                )
-                    .fallbackToDestructiveMigration()
-                    .build()
+).build()
                 INSTANCE = instance
                 instance
             }

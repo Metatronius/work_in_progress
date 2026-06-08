@@ -14,6 +14,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY id DESC")
     fun getAllTasks(): Flow<List<Task>>
 
+    @Query("SELECT * FROM tasks ORDER BY due ASC")
+    fun getAllTasksOrderedByDate(): Flow<List<Task>>
+
     /**
      * Returns the [Task] with the given [id], or null if no such task exists.
      *

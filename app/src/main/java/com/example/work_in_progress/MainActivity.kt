@@ -177,7 +177,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun displayTasks(query: String) {
         taskContainer.removeAllViews()
-        for (task in currentTasks) {
+
+        // Sort tasks: Incomplete first, then completed.
+        val sortedTasks = currentTasks.sortedBy { it.progress >= it.target }
+
+        for (task in sortedTasks) {
             if (query.isNotEmpty() && !task.title.contains(query, ignoreCase = true)) continue
 
             val rowLayout = LinearLayout(this).apply {
@@ -185,8 +189,10 @@ class MainActivity : AppCompatActivity() {
                 setPadding(8, 8, 8, 8)
             }
 
+            val isCompleted = task.progress >= task.target
+
             val checkBox = CheckBox(this).apply {
-                isChecked = task.progress >= task.target
+                isChecked = isCompleted
                 setOnCheckedChangeListener { _, _ -> viewModel.completeTask(task) }
             }
 
@@ -194,6 +200,13 @@ class MainActivity : AppCompatActivity() {
                 text = task.title
                 textSize = 18f
                 setPadding(8, 0, 0, 0)
+
+                // Add strikethrough and dim color if completed
+                if (isCompleted) {
+                    paintFlags = paintFlags or android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
+                    setTextColor(android.graphics.Color.GRAY)
+                }
+
                 setOnClickListener {
                     val priorityLabel = DataUtil.getPriorityName(task.priority)
                     val intent = Intent(this@MainActivity, TaskDetail::class.java).apply {

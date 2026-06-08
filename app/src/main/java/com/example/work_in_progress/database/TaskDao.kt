@@ -20,7 +20,7 @@ interface TaskDao {
      * @param id The primary key of the task to look up.
      */
     @Query(value = "SELECT * FROM tasks WHERE id = :id")
-    fun getTaskById(id: Int): Task?
+    suspend fun getTaskById(id: Int): Task?
 
     /**
      * Inserts [task] into the database. If a row with the same primary key already

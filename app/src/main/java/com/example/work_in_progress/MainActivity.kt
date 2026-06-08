@@ -165,6 +165,14 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        if (requestCode == REQUEST_EDIT_TASK && resultCode == 3) {
+            val id = data?.getIntExtra("TASK_ID", -1) ?: -1
+            if (id != -1) {
+                ReminderScheduler.cancel(this, id)
+                viewModel.deleteTaskById(id)
+            }
+        }
     }
 
     private fun displayTasks(query: String) {
@@ -189,12 +197,19 @@ class MainActivity : AppCompatActivity() {
                 setOnClickListener {
                     val priorityLabel = DataUtil.getPriorityName(task.priority)
                     val intent = Intent(this@MainActivity, TaskDetail::class.java).apply {
+                        putExtra("TASK_ID",  task.id)
                         putExtra("TITLE",    task.title)
                         putExtra("DATE",     task.due ?: "")
                         putExtra("PRIORITY", priorityLabel)
                         putExtra("NOTES",    task.notes)
+                        putExtra("CREATED",  task.created)
+                        putExtra("REMIND",   task.remind)
+                        putExtra("PROGRESS", task.progress)
+                        putExtra("TARGET",   task.target)
+                        putParcelableArrayListExtra("TASK_LIST", ArrayList(currentTasks))
                     }
-                    startActivity(intent)
+                    @Suppress("DEPRECATION")
+                    startActivityForResult(intent, REQUEST_EDIT_TASK)
                 }
                 setOnLongClickListener {
                     val options = arrayOf("Edit", "Delete")

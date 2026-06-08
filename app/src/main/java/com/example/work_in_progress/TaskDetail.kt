@@ -22,10 +22,15 @@ class TaskDetail : AppCompatActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        val taskId = intent.getIntExtra("TASK_ID", -1)
         val title = intent.getStringExtra("TITLE")
         val date = intent.getStringExtra("DATE")
         val priority = intent.getStringExtra("PRIORITY")
         val notes = intent.getStringExtra("NOTES")
+        val created = intent.getStringExtra("CREATED")
+        val remind = intent.getBooleanExtra("REMIND", false)
+        val progressValue = intent.getIntExtra("PROGRESS", 0)
+        val targetValue = intent.getIntExtra("TARGET", 1)
 
         position = intent.getIntExtra("POSITION", -1)
 
@@ -61,7 +66,7 @@ class TaskDetail : AppCompatActivity() {
         deleteButton.setOnClickListener {
 
             val resultIntent = Intent()
-            resultIntent.putExtra("POSITION", position)
+            resultIntent.putExtra("TASK_ID", taskId)
 
             setResult(3, resultIntent)
 
@@ -69,14 +74,19 @@ class TaskDetail : AppCompatActivity() {
         }
 
         editButton.setOnClickListener {
-            val intent = Intent(this, AddTask::class.java)
+            val intent = Intent(this, EditTask::class.java).apply {
+                putExtra("TASK_ID", taskId)
+                putExtra("TITLE", title)
+                putExtra("DATE", date)
+                putExtra("PRIORITY", priority)
+                putExtra("NOTES", notes)
+                putExtra("CREATED", created)
+                putExtra("REMIND", remind)
+                putExtra("PROGRESS", progressValue)
+                putExtra("TARGET", targetValue)
+            }
 
-            intent.putExtra("TITLE", title)
-            intent.putExtra("DATE", date)
-            intent.putExtra("PRIORITY", priority)
-            intent.putExtra("NOTES", notes)
-            intent.putExtra("POSITION", position)
-
+            @Suppress("DEPRECATION")
             startActivityForResult(intent, 2)
         }
     }

@@ -9,8 +9,7 @@ object DataUtil {
         return Priority.valueOf(priority.trim().uppercase())
     }
     fun getPriority(priority: Int): Priority {
-        // TODO: BUG - Line 10-11: Only checks priority > 3 but not priority < 0. Will throw IndexOutOfBoundsException for negative values.
-        if (priority > 3) throw IllegalArgumentException("Priority must be between 0 and 3.")
+        require(priority in 0..3) { "Priority must be between 0 and 3." }
         return Priority.entries[priority]
     }
     fun getPriorityName(priority: Int): String {

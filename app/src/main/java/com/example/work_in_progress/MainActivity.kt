@@ -178,34 +178,24 @@ class MainActivity : AppCompatActivity() {
     private fun displayTasks(query: String) {
         taskContainer.removeAllViews()
 
-        // Sort tasks, incomplete ones should be pushed to the bottom of the list.
+        // Sort tasks: incomplete first, then completed.
         val sortedTasks = currentTasks.sortedBy { it.progress >= it.target }
 
         for (task in sortedTasks) {
             if (query.isNotEmpty() && !task.title.contains(query, ignoreCase = true)) continue
 
-            val rowLayout = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                setPadding(8, 8, 8, 8)
-            }
-
             val isCompleted = task.progress >= task.target
 
-            val checkBox = CheckBox(this).apply {
-                isChecked = isCompleted
-                setOnCheckedChangeListener { _, _ -> viewModel.completeTask(task) }
-            }
-
-            val titleView = TextView(this).apply {
-                text = task.title
-                textSize = 18f
-                setPadding(8, 0, 0, 0)
-
-                // Add strikethrough and dim color if completed
-                if (isCompleted) {
-                    paintFlags = paintFlags or android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
-                    setTextColor(android.graphics.Color.GRAY)
-                }
+            val rowLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(16, 16, 16, 16)
+                
+                // Make the entire row clickable with a ripple effect
+                val outValue = android.util.TypedValue()
+                theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
+                setBackgroundResource(outValue.resourceId)
+                isClickable = true
+                isFocusable = true
 
                 setOnClickListener {
                     val priorityLabel = DataUtil.getPriorityName(task.priority)
@@ -224,6 +214,7 @@ class MainActivity : AppCompatActivity() {
                     @Suppress("DEPRECATION")
                     startActivityForResult(intent, REQUEST_EDIT_TASK)
                 }
+
                 setOnLongClickListener {
                     val options = arrayOf("Edit", "Delete")
                     android.app.AlertDialog.Builder(this@MainActivity)
@@ -261,6 +252,24 @@ class MainActivity : AppCompatActivity() {
                         }
                         .show()
                     true
+                }
+            }
+
+            val checkBox = CheckBox(this).apply {
+                isChecked = isCompleted
+                setOnCheckedChangeListener { _, _ -> viewModel.completeTask(task) }
+            }
+
+            val titleView = TextView(this).apply {
+                text = task.title
+                textSize = 18f
+                setPadding(8, 0, 0, 0)
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+
+                // Add strikethrough and dim color if completed
+                if (isCompleted) {
+                    paintFlags = paintFlags or android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
+                    setTextColor(android.graphics.Color.GRAY)
                 }
             }
 

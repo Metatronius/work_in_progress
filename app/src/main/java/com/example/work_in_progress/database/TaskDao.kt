@@ -8,14 +8,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TaskDao {
     /**
-     * Returns a [Flow] that emits the full list of tasks ordered by most recently
-     * inserted first. The Flow re-emits whenever the underlying table changes.
+     * Returns a [Flow] that emits the full list of tasks.
+     * Tasks with due dates appear first (closest first), followed by tasks without due dates (newest first).
      */
-    @Query("SELECT * FROM tasks ORDER BY id DESC")
+    @Query("SELECT * FROM tasks ORDER BY due IS NULL ASC, due ASC, id DESC")
     fun getAllTasks(): Flow<List<Task>>
-
-    @Query("SELECT * FROM tasks ORDER BY due ASC")
-    fun getAllTasksOrderedByDate(): Flow<List<Task>>
 
     /**
      * Returns the [Task] with the given [id], or null if no such task exists.

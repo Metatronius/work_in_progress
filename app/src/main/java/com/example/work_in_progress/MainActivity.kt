@@ -178,7 +178,7 @@ class MainActivity : AppCompatActivity() {
     private fun displayTasks(query: String) {
         taskContainer.removeAllViews()
 
-        // Sort tasks: Incomplete first, then completed.
+        // Sort tasks, incomplete ones should be pushed to the bottom of the list.
         val sortedTasks = currentTasks.sortedBy { it.progress >= it.target }
 
         for (task in sortedTasks) {

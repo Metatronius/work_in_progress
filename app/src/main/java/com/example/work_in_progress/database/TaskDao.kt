@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.Flow
 interface TaskDao {
     /**
      * Returns a [Flow] that emits the full list of tasks.
-     * Tasks with due dates appear first (closest first), followed by tasks without due dates (newest first).
+     * Tasks are ordered by newest first (descending ID).
      */
-    @Query("SELECT * FROM tasks ORDER BY due IS NULL ASC, due ASC, id DESC")
+    @Query("SELECT * FROM tasks ORDER BY id DESC")
     fun getAllTasks(): Flow<List<Task>>
 
     /**

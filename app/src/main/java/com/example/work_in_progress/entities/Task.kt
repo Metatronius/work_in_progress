@@ -1,8 +1,14 @@
-/** Room entity definition for a task stored in the "tasks" table. */
-package com.example.work_in_progress.database
-import androidx.room.*
+package com.example.work_in_progress.entities
+
+import android.os.Parcelable
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.example.work_in_progress.dtos.TaskParams
+import com.example.work_in_progress.util.DataUtil
+import kotlinx.parcelize.Parcelize
 import java.util.Date
 
+/** Room entity definition for a task stored in the "tasks" table. */
 /**
  * Room entity representing a single task stored in the "tasks" table.
  *
@@ -16,6 +22,7 @@ import java.util.Date
  * @property progress Current progress value (0 = incomplete, 1 = complete).
  * @property target   Target progress value that represents full completion (default 1).
  */
+@Parcelize
 @Entity(tableName = "tasks")
 data class Task(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
@@ -25,6 +32,17 @@ data class Task(
     val created: String = Date().toString(),
     val due: String? = null,
     val remind: Boolean = false,
-    val progress: Int = 0,
+    var progress: Int = 0,
     val target: Int = 1
-)
+): Parcelable {
+    constructor(params: TaskParams) : this(
+        title = params.title,
+        notes = params.notes,
+        priority = params.priority.ordinal,
+        due = params.due,
+        remind = params.remind,
+        progress = params.progress
+    ) {
+        DataUtil.validateTask(params)
+    }
+}

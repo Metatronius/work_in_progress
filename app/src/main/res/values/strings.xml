@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">work_in_progress</string>
+    <string name="tasks_for_date">Tasks for %1$s\n%2$s</string>
+    <string name="no_tasks_for_date">Tasks for %1$s\n(No tasks)</string>
+    <string name="switch_to_monthly">Switch to Monthly</string>
+    <string name="switch_to_weekly">Switch to Weekly</string>
+    <string name="day_title_with_tasks">🔵 %1$s (%2$s)</string>
+    <string name="day_title_no_tasks">%1$s (%2$s)</string>
+    <string name="no_tasks">No tasks</string>
+    <string name="task_bullet">• %1$s</string>
 </resources>

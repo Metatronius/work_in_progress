@@ -1,5 +1,3 @@
-// Copyright (c) 2026 Metatronius. All rights reserved.
-
 package com.example.work_in_progress
 
 import android.app.Activity
@@ -8,6 +6,7 @@ import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.work_in_progress.extensions.getTaskViewModel
+import com.example.work_in_progress.util.DataUtil
 
 /**
  * Activity for editing an existing task.
@@ -33,12 +32,11 @@ class EditTask : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_task)
 
-        val viewModel by lazy { getTaskViewModel() }
-
         val taskId = intent.getIntExtra("TASK_ID", -1)
         val taskTitle = intent.getStringExtra("TITLE") ?: ""
         val taskDate = intent.getStringExtra("DATE") ?: ""
         val taskPriority = intent.getStringExtra("PRIORITY") ?: ""
+        val taskCreated = intent.getStringExtra("CREATED") ?: ""
         val taskNotes = intent.getStringExtra("NOTES") ?: ""
         val taskRemind = intent.getBooleanExtra("REMIND", false)
         val taskProgress = intent.getIntExtra("PROGRESS", 0)
@@ -69,18 +67,14 @@ class EditTask : AppCompatActivity() {
                 findViewById<RadioButton>(selectedPriorityId).text.toString()
             } else "None"
 
-            val priorityValue = when (priorityLabel) {
-                "Low" -> 1
-                "Medium" -> 2
-                "High" -> 3
-                else -> 0
-            }
+            val priorityValue = DataUtil.getPriorityValue(priorityLabel)
 
             val resultIntent = Intent().apply {
                 putExtra("TASK_ID", taskId)
                 putExtra("TITLE", titleField.text.toString())
                 putExtra("DATE", dateField.text.toString())
                 putExtra("PRIORITY", priorityValue)
+                putExtra("CREATED", taskCreated)
                 putExtra("NOTES", notesField.text.toString())
                 putExtra("REMIND", reminderSwitch.isChecked)
                 putExtra("PROGRESS", taskProgress)

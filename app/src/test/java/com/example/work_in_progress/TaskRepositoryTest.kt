@@ -1,8 +1,7 @@
-// Copyright (c) 2026 Metatronius. All rights reserved.
-
 package com.example.work_in_progress
 
 import com.example.work_in_progress.database.*
+import com.example.work_in_progress.entities.Task
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -21,15 +20,10 @@ class TaskRepositoryTest {
     private val taskDao: TaskDao = mock()
     private lateinit var repository: TaskRepository
 
+
     /**
-     * Tests that the `insert` function of the `TaskRepository` correctly delegates the
-     * task insertion to the `taskDao`.
-     *
-     * This test verifies that when a task is inserted into the repository,
-     * the corresponding method in the data access object (DAO) is called with the
-     * same task.
-     *
-     * @throws Exception if the test fails due to unexpected behavior.
+     * Initializes the test environment by mocking the [TaskDao] behavior
+     * and creating an instance of [TaskRepository].
      */
     @Before
     fun setup() {
@@ -38,9 +32,11 @@ class TaskRepositoryTest {
     }
 
     /**
-     * Tests that the `update` function of the repository correctly delegates the call to the `updateTask` method of the DAO.
+     * Tests that the insert operation in [TaskRepository] correctly
+     * delegates the call to the [TaskDao].
      *
-     * This function creates a `Task` object with an updated title and verifies that the DAO's `updateTask` method is invoked with the correct task.
+     * This test verifies that when a task is inserted, the corresponding
+     * method in the DAO is invoked as expected.
      */
     @Test
     fun insert_delegatesToDao() = runTest {
